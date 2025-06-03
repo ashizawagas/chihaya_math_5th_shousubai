@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>千早算数クエスト - 5年生小数版</title>
+<style>
+body{font-family:Arial;text-align:center;background:#f0f8ff;margin:0;padding:20px}
+.monster{font-size:80px;transition:transform .3s;margin:20px 0}
+.monster.level-up{animation:levelUp 3s}
+.monster.correct{animation:correct 1.5s}
+.monster.wrong{animation:wrong 1s}
+.monster.super-clear{animation:superClear 4s}
+
+@keyframes levelUp{
+  0%{transform:scale(1)}
+  20%{transform:scale(2)rotate(180deg);color:#ff0}
+  40%{transform:scale(3)rotate(360deg);color:gold;filter:drop-shadow(0 0 20px gold)}
+  60%{transform:scale(2.5)rotate(540deg);color:#ff69b4;filter:drop-shadow(0 0 30px #ff69b4)}
+  80%{transform:scale(3.5)rotate(720deg);color:#00ff00;filter:drop-shadow(0 0 40px #00ff00)}
+  100%{transform:scale(1)rotate(900deg);color:gold}
+}
+
+@keyframes correct{
+  0%{transform:scale(1)}
+  25%{transform:scale(1.4)rotate(15deg);color:#0f0;filter:drop-shadow(0 0 10px #0f0)}
+  50%{transform:scale(1.6)rotate(-15deg);color:#00ff00;filter:drop-shadow(0 0 15px #00ff00)}
+  75%{transform:scale(1.3)rotate(10deg);color:#32cd32}
+  100%{transform:scale(1);color:gold}
+}
+
+@keyframes wrong{
+  0%{transform:scale(1)}
+  25%{transform:scale(1.2)rotate(-10deg);color:#f00}
+  50%{transform:scale(1.2)rotate(10deg);color:#f00}
+  75%{transform:scale(1.2)rotate(-10deg);color:#f00}
+  100%{transform:scale(1);color:#333}
+}
+
+@keyframes superClear{
+  0%{transform:scale(1)rotate(0deg);color:gold}
+  10%{transform:scale(4)rotate(180deg);color:#ff0;filter:drop-shadow(0 0 50px #ff0)}
+  20%{transform:scale(5)rotate(360deg);color:#ff69b4;filter:drop-shadow(0 0 60px #ff69b4)}
+  30%{transform:scale(6)rotate(540deg);color:#00ff00;filter:drop-shadow(0 0 70px #00ff00)}
+  40%{transform:scale(7)rotate(720deg);color:#00bfff;filter:drop-shadow(0 0 80px #00bfff)}
+  50%{transform:scale(8)rotate(900deg);color:#ff4500;filter:drop-shadow(0 0 90px #ff4500)}
+  60%{transform:scale(7)rotate(1080deg);color:#9370db;filter:drop-shadow(0 0 80px #9370db)}
+  70%{transform:scale(6)rotate(1260deg);color:#ffd700;filter:drop-shadow(0 0 70px #ffd700)}
+  80%{transform:scale(5)rotate(1440deg);color:#ff1493;filter:drop-shadow(0 0 60px #ff1493)}
+  90%{transform:scale(4)rotate(1620deg);color:#00ff7f;filter:drop-shadow(0 0 50px #00ff7f)}
+  100%{transform:scale(1)rotate(1800deg);color:gold}
+}
+
+.question{font-size:24px;margin:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
+button{margin:10px;padding:12px 24px;font-size:16px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer}
+button:hover{background:#45a049}
+.mode-btn{background:#2196f3;padding:15px 30px;font-size:18px;margin:20px}
+.mode-btn:hover{background:#1976d2}
+.mode-btn.practice{background:#ff9800}
+.mode-btn.practice:hover{background:#f57c00}
+.mode-btn.select{background:#9c27b0}
+.mode-btn.select:hover{background:#7b1fa2}
+.back-to-top{position:fixed;top:20px;right:20px;background:#f44336;z-index:1000}
+.back-to-top:hover{background:#d32f2f}
+.timer{font-size:24px;font-weight:bold;color:#2196f3;margin:10px 0}
+.level-select{display:flex;justify-content:center;gap:20px;margin:20px 0;flex-wrap:wrap}
+.level-btn{background:#4caf50;padding:20px;font-size:18px;min-width:150px}
+.level-btn:hover{background:#45a049}
+.ranking{background:white;border-radius:10px;padding:20px;margin:20px 0;text-align:left}
+.ranking h3{text-align:center;color:#2196f3}
+.rank-item{display:flex;justify-content:space-between;padding:10px;border-bottom:1px solid #eee}
+.rank-item:last-child{border-bottom:none}
+.rank-medal{font-size:20px;margin-right:10px}
+
+input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:10px}
+input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243,.3)}
+select{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:10px;background:white}
+select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243,.3)}
+.status{margin:15px 0;font-size:18px}
+.progress{background:#e0e0e0;border-radius:10px;margin:15px 0;height:20px;overflow:hidden}
+.progress-bar{height:100%;transition:width .3s}
+.progress-bar.practice{background:#ff9800}
+.progress-bar.summary{background:#f44336}
+.progress-bar.select{background:#9c27b0}
+.info{padding:15px;background:white;border-radius:10px;margin:15px 0}
+.mode-info{padding:10px;margin:10px 0;border-radius:8px;font-size:16px}
+.mode-info.practice{background:#fff3e0;color:#f57c00;border:2px solid #ff9800}
+.mode-info.summary{background:#ffebee;color:#d32f2f;border:2px solid #f44336}
+.mode-info.select{background:#f3e5f5;color:#7b1fa2;border:2px solid #9c27b0}
+.clear-screen{background:linear-gradient(45deg,#ff9a9e,#fecfef);animation:rainbow 2s infinite}
+@keyframes rainbow{0%,100%{background:linear-gradient(45deg,#ff9a9e,#fecfef)}50%{background:linear-gradient(45deg,#a8e6cf,#dcedc1)}}
+.gameover{background:#ffebee;color:#d32f2f;padding:20px;border-radius:10px;margin:20px 0}
+.answer-sections{display:flex;justify-content:center;gap:20px;margin:20px 0;flex-wrap:wrap}
+.answer-section{background:white;border:2px solid #2196f3;border-radius:15px;padding:15px;min-width:200px}
+.answer-section h3{margin:0 0 10px 0;color:#2196f3;font-size:16px}
+.normal-input{display:flex;flex-direction:column;align-items:center;gap:10px}
+.normal-input input{width:120px;text-align:center}
+.unit-display{font-size:14px;font-weight:bold;color:#666;margin-top:5px}
+.submit-btn{padding:12px 20px;font-size:16px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer}
+.submit-btn:hover{background:#45a049}
+.equation-input{display:flex;align-items:center;justify-content:center;gap:10px;margin:15px 0;flex-wrap:wrap}
+.equation-input input{width:80px;text-align:center}
+.equation-input select{width:80px;text-align:center}
+.equation-part{font-size:18px;font-weight:bold;color:#333}
+.level-indicator{display:flex;justify-content:center;gap:8px;margin:15px 0;flex-wrap:wrap}
+.level-dot{width:25px;height:25px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
+.level-dot.completed{background:#4caf50;color:white}
+.level-dot.current{background:#2196f3;color:white;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.correct-answer{background:#e8f5e8;color:#2e7d32;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #4caf50}
+.error-msg{background:#ffebee;color:#d32f2f;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #f44336}
+.story-problem{background:#f5f5f5;padding:15px;border-left:4px solid #2196f3;margin:10px 0;text-align:left;line-height:1.6}
+.calculation-problem{background:#f8f9fa;padding:20px;border-radius:10px;margin:15px 0;font-size:28px;font-weight:bold;color:#333}
+</style>
+</head>
+<body>
+<h1>🧮 千早算数クエスト - 5年生小数版</h1>
+
+<div id="start">
+<h2>モードを選択してください</h2>
+<div class="info">
+<div class="mode-info select">
+<h3>🎯 選べるモード</h3>
+<p>• 好きなレベルを選んで10問練習<br>• 間違えても続行可能</p>
+</div>
+<div class="mode-info practice">
+<h3>📚 練習モード</h3>
+<p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る</p>
+</div>
+<div class="mode-info summary">
+<h3>🎯 まとめモード</h3>
+<p>• 全4レベル×各5問＝計20問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• タイマー付きでランキング記録</p>
+</div>
+</div>
+<button class="mode-btn select" onclick="selectMode('select')">選べるモード</button>
+<button class="mode-btn practice" onclick="selectMode('practice')">練習モード</button>
+<button class="mode-btn" onclick="selectMode('summary')">まとめモード</button>
+</div>
+
+<div id="levelSelect" style="display:none">
+<h2>レベルを選択してください</h2>
+<div class="level-select">
+<button class="level-btn" onclick="startSelectMode(1)">レベル1<br>かけ算の文章題</button>
+<button class="level-btn" onclick="startSelectMode(2)">レベル2<br>割り算の文章題</button>
+<button class="level-btn" onclick="startSelectMode(3)">レベル3<br>小数のかけ算</button>
+<button class="level-btn" onclick="startSelectMode(4)">レベル4<br>小数の割り算</button>
+</div>
+<button onclick="backToStart()">戻る</button>
+</div>
+
+<div id="game" style="display:none">
+<button class="back-to-top" onclick="backToStart()">トップ画面に戻る</button>
+<div class="info">
+<div id="modeDisplay"></div>
+<div>レベル<span id="lv">1</span>/4 - <span id="lvInfo"></span></div>
+<div id="timerDisplay" class="timer" style="display:none">⏱️ <span id="timer">00:00</span></div>
+<div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+<div id="levelProgress"></div>
+</div>
+
+<div class="level-indicator" id="levelIndicator"></div>
+<div class="monster" id="monster">📐</div>
+<div class="question" id="q"></div>
+
+<div id="answerSections" class="answer-sections">
+<div class="answer-section">
+<h3>答えを入力してください</h3>
+<div class="normal-input">
+<input type="text" id="answer" placeholder="答えを入力">
+<div id="answerUnit" class="unit-display" style="display:none"></div>
+</div>
+<button class="submit-btn" onclick="submitAnswer()">答える</button>
+</div>
+</div>
+
+<div id="equationSection" class="answer-section" style="display:none">
+<h3>式を作ってください</h3>
+<div class="equation-input">
+<input type="text" id="num1" placeholder="数1">
+<select id="operator">
+<option value="">選択</option>
+<option value="×">×</option>
+<option value="÷">÷</option>
+</select>
+<input type="text" id="num2" placeholder="数2">
+<span class="equation-part">=</span>
+<input type="text" id="result" placeholder="答え">
+</div>
+<button class="submit-btn" onclick="submitEquation()">式を答える</button>
+</div>
+
+<div id="wrong" style="display:none">
+<div id="wrongMsg" class="error-msg">まちがいです。</div>
+<div id="correctAnswer" class="correct-answer" style="display:none">
+<strong>正解：</strong><span id="correctText"></span>
+</div>
+<div id="practiceMsg" style="display:none"><p>このレベルのカウントが0に戻ります。頑張って！</p></div>
+<button onclick="retry()">もう一度</button>
+<button onclick="next()">つぎへ</button>
+</div>
+
+<div class="status">
+<span>スコア: <span id="score">0</span></span>
+<span id="totalQ" style="display:none"> / 20問中</span>
+<span id="selectQ" style="display:none"> / 10問中</span>
+</div>
+</div>
+
+<div id="gameover" style="display:none" class="gameover">
+<h1>ゲームオーバー</h1>
+<div class="monster" style="font-size:120px">😵</div>
+<h2>残念！</h2>
+<div class="info">
+<p>到達レベル: <span id="finalLv"></span>/4</p>
+<p>正解数: <span id="finalScore1"></span>問</p>
+<p>タイム: <span id="finalTime"></span></p>
+</div>
+<button onclick="restart()">もう一度</button>
+</div>
+
+<div id="clear" style="display:none" class="clear-screen">
+<h1>🎉 ゲームクリア！ 🎉</h1>
+<div class="monster" style="font-size:120px">👑</div>
+<h2>おめでとう！全レベル制覇！</h2>
+<div class="info">
+<div>最終スコア: <span id="finalScore2"></span>問正解</div>
+<div id="clearTime" style="display:none">クリアタイム: <span id="finalClearTime"></span></div>
+<div id="ranking" class="ranking" style="display:none">
+<h3>🏆 ランキング</h3>
+<div id="rankingList"></div>
+</div>
+</div>
+<button onclick="restart()">もう一度</button>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let state = {score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),startTime:null,selectLevel:1};
+const monsters = ["📐","🔍","🔢","➗"];
+const lvNames = ["かけ算の文章題（式作成）","割り算の文章題（式作成）","小数のかけ算","小数の割り算"];
+
+const R = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
+const randomDecimal = (min, max, places = 1) => {
+    const num = Math.random() * (max - min) + min;
+    return Math.round(num * Math.pow(10, places)) / Math.pow(10, places);
+};
+
+function setFocus(){
+    setTimeout(()=>{
+        const input = state.prob?.type === 'equation' ? $("num1") : $("answer");
+        if(input) input.focus();
+    }, 150);
+}
+
+document.addEventListener('keydown',(e)=>{
+    if(e.key==='Enter' && e.target.tagName==='INPUT'){
+        e.preventDefault();
+        if(['num1','num2','result'].includes(e.target.id)) submitEquation();
+        else if(e.target.id==='answer') submitAnswer();
+    }
+});
+
+function selectMode(m){
+    if(m === 'select'){
+        $("start").style.display="none";
+        $("levelSelect").style.display="block";
+        return;
+    }
+    
+    state={score:0,level:1,prob:null,unit:"",mode:m,lvCount:0,totalQ:0,qNum:0,completed:new Set(),startTime:null,selectLevel:1};
+    $("start").style.display="none";
+    $("game").style.display="block";
+    
+    if(m === 'summary'){
+        state.startTime = Date.now();
+        $("timerDisplay").style.display="block";
+        startTimer();
+    }
+    
+    updateDisplay();
+    updateLevelIndicator();
+    nextQ();
+}
+
+function startSelectMode(level){
+    state={score:0,level:level,prob:null,unit:"",mode:'select',lvCount:0,totalQ:0,qNum:0,completed:new Set(),startTime:null,selectLevel:level};
+    $("levelSelect").style.display="none";
+    $("game").style.display="block";
+    updateDisplay();
+    updateLevelIndicator();
+    nextQ();
+}
+
+function backToStart(){
+    $("levelSelect").style.display="none";
+    $("game").style.display="none";
+    $("gameover").style.display="none";
+    $("clear").style.display="none";
+    $("start").style.display="block";
+    if(state.timerInterval) clearInterval(state.timerInterval);
+    state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),startTime:null,selectLevel:1};
+}
+
+function startTimer(){
+    state.timerInterval = setInterval(()=>{
+        const elapsed = Date.now() - state.startTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        $("timer").textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }, 1000);
+}
+
+function updateDisplay(){
+    $("lv").textContent=state.level;
+    $("lvInfo").textContent=lvNames[state.level-1];
+    $("score").textContent=state.score;
+    $("monster").textContent=monsters[state.level-1];
+
+    const bar=$("progressBar");
+    if(state.mode==='practice'){
+        $("modeDisplay").innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong></div>';
+        $("levelProgress").textContent=`このレベル: ${state.lvCount}/5問正解`;
+        bar.className="progress-bar practice";
+        bar.style.width=`${(state.lvCount/5)*100}%`;
+        $("totalQ").style.display="none";
+        $("selectQ").style.display="none";
+    }else if(state.mode==='summary'){
+        $("modeDisplay").innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';
+        $("levelProgress").textContent=`問題 ${state.totalQ+1}/20`;
+        bar.className="progress-bar summary";
+        bar.style.width=`${(state.totalQ/20)*100}%`;
+        $("totalQ").style.display="inline";
+        $("totalQ").textContent=" / 20問中";
+        $("selectQ").style.display="none";
+    }else if(state.mode==='select'){
+        $("modeDisplay").innerHTML='<div class="mode-info select"><strong>🎯 選べるモード</strong></div>';
+        $("levelProgress").textContent=`問題 ${state.totalQ+1}/10`;
+        bar.className="progress-bar select";
+        bar.style.width=`${(state.totalQ/10)*100}%`;
+        $("totalQ").style.display="none";
+        $("selectQ").style.display="inline";
+        $("selectQ").textContent=" / 10問中";
+    }
+}
+
+function updateLevelIndicator(){
+    const ind=$("levelIndicator");
+    ind.innerHTML="";
+    if(state.mode === 'select'){
+        const dot=document.createElement("div");
+        dot.className="level-dot current";
+        dot.textContent=state.selectLevel;
+        ind.appendChild(dot);
+    }else{
+        for(let i=1;i<=4;i++){
+            const dot=document.createElement("div");
+            dot.className="level-dot";
+            dot.textContent=i;
+            if(state.completed.has(i))dot.classList.add("completed");
+            else if(i===state.level)dot.classList.add("current");
+            ind.appendChild(dot);
+        }
+    }
+}
+
+function generateProblem(lv){
+    switch(lv){
+        case 1:{ // かけ算の文章題（式を作る問題）
+            const baseNum = randomDecimal(2, 8, 1);
+            const multiplier = randomDecimal(2, 5, 1);
+            const result = baseNum * multiplier;
+            
+            const stories = [
+                [`赤いリボンの長さは${baseNum}mです。青いリボンは赤いリボンの${multiplier}倍の長さです。`, "青いリボンの長さは何mですか？", "m"],
+                [`1個${baseNum}円のりんごを${multiplier}個買いました。`, "りんごの代金は全部で何円ですか？", "円"],
+                [`水槽に${baseNum}Lの水が入っています。さらに${multiplier}倍の水を追加しました。`, "水槽の水は全部で何Lになりますか？", "L"],
+                [`1mの重さが${baseNum}kgの鉄のパイプがあります。`, `${multiplier}mのパイプの重さは何kgですか？`, "kg"],
+                [`花子さんは1日に${baseNum}ページの本を読みます。`, `${multiplier}日間で何ページ読みますか？`, "ページ"],
+                [`1つの箱に${baseNum}個のボールが入っています。`, `${multiplier}つの箱には全部で何個のボールが入っていますか？`, "個"]
+            ];
+            
+            const story = stories[R(0, stories.length-1)];
+            
+            return {
+                q: `<div class="story-problem">${story[0]}<br><strong>${story[1]}</strong></div>`,
+                type: 'equation',
+                num1: baseNum,
+                operator: '×',
+                num2: multiplier,
+                result: result,
+                unit: story[2]
+            };
+        }
+        
+        case 2:{ // 割り算の文章題（式を作る問題）
+            const problemTypes = [
+                // 何倍かを求める問題
+                () => {
+                    const base = randomDecimal(1.5, 6.0, 1);
+                    const multiplied = randomDecimal(4.0, 18.0, 1);
+                    const multiplier = multiplied / base;
+                    
+                    const stories = [
+                        [`太郎くんの身長は${base}mです。`, `花子さんの身長は${multiplied}mです。`, "花子さんの身長は太郎くんの何倍ですか？", "倍"],
+                        [`1本${base}円の鉛筆があります。`, `ペンの値段は${multiplied}円です。`, "ペンの値段は鉛筆の何倍ですか？", "倍"],
+                        [`箱Aには${base}kgの米が入っています。`, `箱Bには${multiplied}kgの米が入っています。`, "箱Bの米の重さは箱Aの何倍ですか？", "倍"],
+                        [`太郎くんは${base}分で宿題を終わらせます。`, `花子さんは${multiplied}分かかります。`, "花子さんの時間は太郎くんの何倍ですか？", "倍"]
+                    ];
+                    
+                    const story = stories[R(0, stories.length-1)];
+                    return {
+                        story1: story[0],
+                        story2: story[1],
+                        question: story[2],
+                        num1: multiplied,
+                        operator: '÷',
+                        num2: base,
+                        result: multiplier,
+                        unit: story[3]
+                    };
+                },
+                // 等分の問題
+                () => {
+                    const total = randomDecimal(6.0, 20.0, 1);
+                    const parts = R(2, 5);
+                    const result = total / parts;
+                    
+                    const stories = [
+                        [`${total}mのロープを${parts}等分します。`, "1本分の長さは何mですか？", "m"],
+                        [`${total}Lのジュースを${parts}人で等しく分けます。`, "1人分は何Lですか？", "L"],
+                        [`${total}kgのお米を${parts}つの袋に等しく分けます。`, "1袋あたり何kgになりますか？", "kg"],
+                        [`${total}円を${parts}人で等しく分けます。`, "1人分は何円ですか？", "円"],
+                        [`${total}個のあめを${parts}人で等しく分けます。`, "1人分は何個ですか？", "個"]
+                    ];
+                    
+                    const story = stories[R(0, stories.length-1)];
+                    return {
+                        story1: story[0],
+                        story2: "",
+                        question: story[1],
+                        num1: total,
+                        operator: '÷',
+                        num2: parts,
+                        result: result,
+                        unit: story[2]
+                    };
+                }
+            ];
+            
+            const problemData = problemTypes[R(0, problemTypes.length-1)]();
+            
+            const storyText = problemData.story2 ? 
+                `${problemData.story1}<br>${problemData.story2}` : 
+                problemData.story1;
+            
+            return {
+                q: `<div class="story-problem">${storyText}<br><strong>${problemData.question}</strong></div>`,
+                type: 'equation',
+                num1: problemData.num1,
+                operator: problemData.operator,
+                num2: problemData.num2,
+                result: problemData.result,
+                unit: problemData.unit
+            };
+        }
+        
+        case 3:{ // 小数のかけ算計算問題
+            const problemTypes = [
+                // 小数 × 整数
+                () => {
+                    const decimal = randomDecimal(1.1, 9.9, 1);
+                    const integer = R(2, 9);
+                    const result = Math.round(decimal * integer * 10) / 10;
+                    return {
+                        num1: decimal,
+                        num2: integer,
+                        result: result
+                    };
+                },
+                // 小数 × 小数（小数第1位同士）
+                () => {
+                    const decimal1 = randomDecimal(1.1, 5.9, 1);
+                    const decimal2 = randomDecimal(1.1, 4.9, 1);
+                    const result = Math.round(decimal1 * decimal2 * 100) / 100;
+                    return {
+                        num1: decimal1,
+                        num2: decimal2,
+                        result: result
+                    };
+                },
+                // 整数 × 小数
+                () => {
+                    const integer = R(2, 8);
+                    const decimal = randomDecimal(1.2, 6.8, 1);
+                    const result = Math.round(integer * decimal * 10) / 10;
+                    return {
+                        num1: integer,
+                        num2: decimal,
+                        result: result
+                    };
+                }
+            ];
+            
+            const problemData = problemTypes[R(0, problemTypes.length-1)]();
+            
+            return {
+                q: `<div class="calculation-problem">${problemData.num1} × ${problemData.num2} =</div>`,
+                type: 'answer',
+                answer: problemData.result,
+                unit: ""
+            };
+        }
+        
+        case 4:{ // 小数の割り算計算問題（小数第2位まで割り切れる）
+            const problemTypes = [
+                // 小数 ÷ 整数（割り切れる）
+                () => {
+                    const divisors = [2, 4, 5, 8, 10];
+                    const divisor = divisors[R(0, divisors.length-1)];
+                    const result = randomDecimal(0.5, 9.9, 1);
+                    const dividend = Math.round(result * divisor * 10) / 10;
+                    return {
+                        num1: dividend,
+                        num2: divisor,
+                        result: result
+                    };
+                },
+                // 整数 ÷ 小数（結果が割り切れる）
+                () => {
+                    const decimals = [0.5, 1.25, 2.5, 4];
+                    const divisor = decimals[R(0, decimals.length-1)];
+                    const result = R(2, 12);
+                    const dividend = result * divisor;
+                    return {
+                        num1: dividend,
+                        num2: divisor,
+                        result: result
+                    };
+                },
+                // 小数 ÷ 小数（結果が小数第2位まで）
+                () => {
+                    const divisors = [0.5, 1.25, 2.5];
+                    const divisor = divisors[R(0, divisors.length-1)];
+                    const results = [0.4, 0.8, 1.2, 1.6, 2.4, 3.2, 4.8];
+                    const result = results[R(0, results.length-1)];
+                    const dividend = Math.round(result * divisor * 100) / 100;
+                    return {
+                        num1: dividend,
+                        num2: divisor,
+                        result: result
+                    };
+                }
+            ];
+            
+            const problemData = problemTypes[R(0, problemTypes.length-1)]();
+            
+            return {
+                q: `<div class="calculation-problem">${problemData.num1} ÷ ${problemData.num2} =</div>`,
+                type: 'answer',
+                answer: problemData.result,
+                unit: ""
+            };
+        }
+    }
+}
+
+function nextQ(){
+    if(state.mode==='practice'){
+        if(state.lvCount>=5){
+            state.completed.add(state.level);
+            if(state.level>=4){showClear();return;}
+            state.level++;
+            state.lvCount=0;
+            animate("level-up");
+            updateLevelIndicator();
+        }
+    }else if(state.mode==='summary'){
+        if(state.level>=4&&state.qNum>=5){showClear();return;}
+        if(state.qNum>=5){
+            state.completed.add(state.level);
+            state.level++;
+            state.qNum=0;
+            animate("level-up");
+            updateLevelIndicator();
+        }
+    }else if(state.mode==='select'){
+        if(state.totalQ>=10){showClear();return;}
+    }
+
+    state.prob=generateProblem(state.level);
+    $("q").innerHTML=state.prob.q;
+    state.unit=state.prob.unit||"";
+
+    clearInputs();
+    $("wrong").style.display="none";
+
+    if(state.prob.type==='equation'){
+        $("answerSections").style.display="none";
+        $("equationSection").style.display="block";
+    }else{
+        $("answerSections").style.display="flex";
+        $("equationSection").style.display="none";
+    }
+
+    $("answerUnit").textContent=state.unit;
+    $("answerUnit").style.display=state.unit?"block":"none";
+
+    updateDisplay();
+    setFocus();
+}
+
+function clearInputs(){
+    ["answer","num1","num2","result"].forEach(id=>$(id).value="");
+    $("operator").value="";
+}
+
+function animate(cls){
+    $("monster").classList.add(cls);
+    setTimeout(()=>$("monster").classList.remove(cls),cls==="level-up"?3000:cls==="super-clear"?4000:1500);
+}
+
+function submitAnswer(){
+    const userInput = $("answer").value.trim();
+    if(!userInput){showError("答えを入力してください");return;}
+    
+    const userAnswer = parseFloat(userInput);
+    const correctAnswer = state.prob.answer;
+    
+    if(isNaN(userAnswer)){showError("数値を入力してください");return;}
+    
+    const tolerance = 0.01;
+    const isCorrect = Math.abs(userAnswer - correctAnswer) < tolerance;
+    
+    handleAnswer(isCorrect, correctAnswer + state.unit);
+}
+
+function submitEquation(){
+    const num1 = parseFloat($("num1").value) || 0;
+    const operator = $("operator").value;
+    const num2 = parseFloat($("num2").value) || 0;
+    const result = parseFloat($("result").value) || 0;
+    
+    if(num1 === 0 || !operator || num2 === 0 || result === 0){
+        showError("すべての欄に数値・記号を入力してください");
+        return;
+    }
+    
+    const tolerance = 0.01;
+    const isCorrect = Math.abs(num1 - state.prob.num1) < tolerance &&
+                     operator === state.prob.operator &&
+                     Math.abs(num2 - state.prob.num2) < tolerance &&
+                     Math.abs(result - state.prob.result) < tolerance;
+    
+    const correctEq = `${state.prob.num1} ${state.prob.operator} ${state.prob.num2} = ${state.prob.result}${state.unit}`;
+    handleAnswer(isCorrect, correctEq);
+}
+
+function handleAnswer(isCorrect, correctAns){
+    if(isCorrect){
+        state.score++;
+        if(state.mode==='practice')state.lvCount++;
+        else if(state.mode==='summary'){state.qNum++;state.totalQ++;}
+        else if(state.mode==='select')state.totalQ++;
+        animate("correct");
+        setTimeout(nextQ,1500);
+    }else{
+        $("wrong").style.display="block";
+        $("correctAnswer").style.display="block";
+        $("correctText").textContent=correctAns;
+        
+        if(state.mode==='practice'){
+            state.lvCount=0;
+            $("practiceMsg").style.display="block";
+        }else if(state.mode==='summary'){
+            showGameOver();
+            return;
+        }else if(state.mode==='select'){
+            // 選べるモードでは間違えても続行
+            $("practiceMsg").style.display="none";
+        }
+        animate("wrong");
+    }
+}
+
+function showError(msg){
+    $("wrongMsg").textContent=msg;
+    $("wrong").style.display="block";
+    $("correctAnswer").style.display="none";
+    $("practiceMsg").style.display="none";
+}
+
+function retry(){
+    $("wrong").style.display="none";
+    clearInputs();
+    setFocus();
+}
+
+function next(){
+    nextQ();
+}
+
+function showGameOver(){
+    if(state.timerInterval) clearInterval(state.timerInterval);
+    $("game").style.display="none";
+    $("gameover").style.display="block";
+    $("finalLv").textContent=state.level;
+    $("finalScore1").textContent=state.score;
+    if(state.mode==='summary'){
+        const elapsed = Date.now() - state.startTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        $("finalTime").textContent = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+    }
+}
+
+function showClear(){
+    if(state.timerInterval) clearInterval(state.timerInterval);
+    $("game").style.display="none";
+    $("clear").style.display="block";
+    $("finalScore2").textContent=state.score;
+    
+    if(state.mode==='summary'){
+        const elapsed = Date.now() - state.startTime;
+        const minutes = Math.floor(elapsed / 60000);
+        const seconds = Math.floor((elapsed % 60000) / 1000);
+        const timeStr = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        $("finalClearTime").textContent = timeStr;
+        $("clearTime").style.display="block";
+        
+        // ランキング保存・表示
+        saveAndShowRanking(elapsed);
+    }
+    
+    animate("super-clear");
+}
+
+function saveAndShowRanking(time){
+    const rankings = JSON.parse(localStorage.getItem('mathQuestRankings') || '[]');
+    const now = new Date();
+    const dateStr = `${now.getFullYear()}/${(now.getMonth()+1).toString().padStart(2,'0')}/${now.getDate().toString().padStart(2,'0')} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+    
+    rankings.push({
+        time: time,
+        score: state.score,
+        date: dateStr
+    });
+    
+    rankings.sort((a,b) => a.time - b.time);
+    rankings.splice(10); // 上位10位まで保存
+    
+    localStorage.setItem('mathQuestRankings', JSON.stringify(rankings));
+    
+    // 現在の順位を計算
+    const currentRank = rankings.findIndex(r => r.time === time && r.date === dateStr) + 1;
+    
+    // ランキング表示
+    let rankingHtml = `<div style="text-align:center;margin:10px 0;font-size:18px;color:#2196f3;">あなたの順位: ${currentRank}位</div>`;
+    
+    const top3 = rankings.slice(0, 3);
+    top3.forEach((record, index) => {
+        const medals = ['🥇', '🥈', '🥉'];
+        const minutes = Math.floor(record.time / 60000);
+        const seconds = Math.floor((record.time % 60000) / 1000);
+        const timeStr = `${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+        
+        rankingHtml += `
+            <div class="rank-item">
+                <div><span class="rank-medal">${medals[index]}</span>${index + 1}位</div>
+                <div>${timeStr}</div>
+                <div>${record.date}</div>
+            </div>
+        `;
+    });
+    
+    $("rankingList").innerHTML = rankingHtml;
+    $("ranking").style.display = "block";
+}
+
+function restart(){
+    $("gameover").style.display="none";
+    $("clear").style.display="none";
+    $("start").style.display="block";
+    if(state.timerInterval) clearInterval(state.timerInterval);
+    state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),startTime:null,selectLevel:1};
+}
+</script>
+</body>
+</html>
