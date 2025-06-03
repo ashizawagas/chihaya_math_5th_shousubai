@@ -139,8 +139,8 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 <div id="levelSelect" style="display:none">
 <h2>レベルを選択してください</h2>
 <div class="level-select">
-<button class="level-btn" onclick="startSelectMode(1)">レベル1<br>かけ算の文章題</button>
-<button class="level-btn" onclick="startSelectMode(2)">レベル2<br>割り算の文章題</button>
+<button class="level-btn" onclick="startSelectMode(1)">レベル1<br>かけ算の立式</button>
+<button class="level-btn" onclick="startSelectMode(2)">レベル2<br>割り算の立式</button>
 <button class="level-btn" onclick="startSelectMode(3)">レベル3<br>小数のかけ算</button>
 <button class="level-btn" onclick="startSelectMode(4)">レベル4<br>小数の割り算</button>
 </div>
@@ -173,7 +173,7 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 </div>
 
 <div id="equationSection" class="answer-section" style="display:none">
-<h3>式を作ってください</h3>
+<h3>式を作ってください（答えは計算しません）</h3>
 <div class="equation-input">
 <input type="text" id="num1" placeholder="数1">
 <select id="operator">
@@ -182,8 +182,6 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 <option value="÷">÷</option>
 </select>
 <input type="text" id="num2" placeholder="数2">
-<span class="equation-part">=</span>
-<input type="text" id="result" placeholder="答え">
 </div>
 <button class="submit-btn" onclick="submitEquation()">式を答える</button>
 </div>
@@ -236,7 +234,7 @@ select:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,24
 const $ = id => document.getElementById(id);
 let state = {score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),startTime:null,selectLevel:1};
 const monsters = ["📐","🔍","🔢","➗"];
-const lvNames = ["かけ算の文章題（式作成）","割り算の文章題（式作成）","小数のかけ算","小数の割り算"];
+const lvNames = ["かけ算の立式","割り算の立式","小数のかけ算","小数の割り算"];
 
 const R = (min,max) => Math.floor(Math.random()*(max-min+1))+min;
 const randomDecimal = (min, max, places = 1) => {
@@ -254,7 +252,7 @@ function setFocus(){
 document.addEventListener('keydown',(e)=>{
     if(e.key==='Enter' && e.target.tagName==='INPUT'){
         e.preventDefault();
-        if(['num1','num2','result'].includes(e.target.id)) submitEquation();
+        if(['num1','num2'].includes(e.target.id)) submitEquation();
         else if(e.target.id==='answer') submitAnswer();
     }
 });
@@ -364,18 +362,17 @@ function updateLevelIndicator(){
 
 function generateProblem(lv){
     switch(lv){
-        case 1:{ // かけ算の文章題（式を作る問題）
+        case 1:{ // かけ算の文章題（立式のみ）
             const baseNum = randomDecimal(2, 8, 1);
             const multiplier = randomDecimal(2, 5, 1);
-            const result = baseNum * multiplier;
             
             const stories = [
-                [`赤いリボンの長さは${baseNum}mです。青いリボンは赤いリボンの${multiplier}倍の長さです。`, "青いリボンの長さは何mですか？", "m"],
-                [`1個${baseNum}円のりんごを${multiplier}個買いました。`, "りんごの代金は全部で何円ですか？", "円"],
-                [`水槽に${baseNum}Lの水が入っています。さらに${multiplier}倍の水を追加しました。`, "水槽の水は全部で何Lになりますか？", "L"],
-                [`1mの重さが${baseNum}kgの鉄のパイプがあります。`, `${multiplier}mのパイプの重さは何kgですか？`, "kg"],
-                [`花子さんは1日に${baseNum}ページの本を読みます。`, `${multiplier}日間で何ページ読みますか？`, "ページ"],
-                [`1つの箱に${baseNum}個のボールが入っています。`, `${multiplier}つの箱には全部で何個のボールが入っていますか？`, "個"]
+                [`赤いリボンの長さは${baseNum}mです。青いリボンは赤いリボンの${multiplier}倍の長さです。`, "青いリボンの長さを求める式を作ってください。"],
+                [`1個${baseNum}円のりんごを${multiplier}個買いました。`, "りんごの代金の合計を求める式を作ってください。"],
+                [`水槽に${baseNum}Lの水が入っています。さらに${multiplier}倍の水を追加しました。`, "水槽の水の合計を求める式を作ってください。"],
+                [`1mの重さが${baseNum}kgの鉄のパイプがあります。`, `${multiplier}mのパイプの重さを求める式を作ってください。`],
+                [`花子さんは1日に${baseNum}ページの本を読みます。`, `${multiplier}日間で読むページ数を求める式を作ってください。`],
+                [`1つの箱に${baseNum}個のボールが入っています。`, `${multiplier}つの箱のボールの合計を求める式を作ってください。`]
             ];
             
             const story = stories[R(0, stories.length-1)];
@@ -385,25 +382,22 @@ function generateProblem(lv){
                 type: 'equation',
                 num1: baseNum,
                 operator: '×',
-                num2: multiplier,
-                result: result,
-                unit: story[2]
+                num2: multiplier
             };
         }
         
-        case 2:{ // 割り算の文章題（式を作る問題）
+        case 2:{ // 割り算の文章題（立式のみ）
             const problemTypes = [
                 // 何倍かを求める問題
                 () => {
                     const base = randomDecimal(1.5, 6.0, 1);
                     const multiplied = randomDecimal(4.0, 18.0, 1);
-                    const multiplier = multiplied / base;
                     
                     const stories = [
-                        [`太郎くんの身長は${base}mです。`, `花子さんの身長は${multiplied}mです。`, "花子さんの身長は太郎くんの何倍ですか？", "倍"],
-                        [`1本${base}円の鉛筆があります。`, `ペンの値段は${multiplied}円です。`, "ペンの値段は鉛筆の何倍ですか？", "倍"],
-                        [`箱Aには${base}kgの米が入っています。`, `箱Bには${multiplied}kgの米が入っています。`, "箱Bの米の重さは箱Aの何倍ですか？", "倍"],
-                        [`太郎くんは${base}分で宿題を終わらせます。`, `花子さんは${multiplied}分かかります。`, "花子さんの時間は太郎くんの何倍ですか？", "倍"]
+                        [`太郎くんの身長は${base}mです。`, `花子さんの身長は${multiplied}mです。`, "花子さんの身長が太郎くんの何倍かを求める式を作ってください。"],
+                        [`1本${base}円の鉛筆があります。`, `ペンの値段は${multiplied}円です。`, "ペンの値段が鉛筆の何倍かを求める式を作ってください。"],
+                        [`箱Aには${base}kgの米が入っています。`, `箱Bには${multiplied}kgの米が入っています。`, "箱Bの米の重さが箱Aの何倍かを求める式を作ってください。"],
+                        [`太郎くんは${base}分で宿題を終わらせます。`, `花子さんは${multiplied}分かかります。`, "花子さんの時間が太郎くんの何倍かを求める式を作ってください。"]
                     ];
                     
                     const story = stories[R(0, stories.length-1)];
@@ -413,23 +407,20 @@ function generateProblem(lv){
                         question: story[2],
                         num1: multiplied,
                         operator: '÷',
-                        num2: base,
-                        result: multiplier,
-                        unit: story[3]
+                        num2: base
                     };
                 },
                 // 等分の問題
                 () => {
                     const total = randomDecimal(6.0, 20.0, 1);
                     const parts = R(2, 5);
-                    const result = total / parts;
                     
                     const stories = [
-                        [`${total}mのロープを${parts}等分します。`, "1本分の長さは何mですか？", "m"],
-                        [`${total}Lのジュースを${parts}人で等しく分けます。`, "1人分は何Lですか？", "L"],
-                        [`${total}kgのお米を${parts}つの袋に等しく分けます。`, "1袋あたり何kgになりますか？", "kg"],
-                        [`${total}円を${parts}人で等しく分けます。`, "1人分は何円ですか？", "円"],
-                        [`${total}個のあめを${parts}人で等しく分けます。`, "1人分は何個ですか？", "個"]
+                        [`${total}mのロープを${parts}等分します。`, "1本分の長さを求める式を作ってください。"],
+                        [`${total}Lのジュースを${parts}人で等しく分けます。`, "1人分の量を求める式を作ってください。"],
+                        [`${total}kgのお米を${parts}つの袋に等しく分けます。`, "1袋あたりの重さを求める式を作ってください。"],
+                        [`${total}円を${parts}人で等しく分けます。`, "1人分の金額を求める式を作ってください。"],
+                        [`${total}個のあめを${parts}人で等しく分けます。`, "1人分の個数を求める式を作ってください。"]
                     ];
                     
                     const story = stories[R(0, stories.length-1)];
@@ -439,9 +430,7 @@ function generateProblem(lv){
                         question: story[1],
                         num1: total,
                         operator: '÷',
-                        num2: parts,
-                        result: result,
-                        unit: story[2]
+                        num2: parts
                     };
                 }
             ];
@@ -457,9 +446,7 @@ function generateProblem(lv){
                 type: 'equation',
                 num1: problemData.num1,
                 operator: problemData.operator,
-                num2: problemData.num2,
-                result: problemData.result,
-                unit: problemData.unit
+                num2: problemData.num2
             };
         }
         
@@ -609,7 +596,7 @@ function nextQ(){
 }
 
 function clearInputs(){
-    ["answer","num1","num2","result"].forEach(id=>$(id).value="");
+    ["answer","num1","num2"].forEach(id=>$(id).value="");
     $("operator").value="";
 }
 
@@ -637,9 +624,8 @@ function submitEquation(){
     const num1 = parseFloat($("num1").value) || 0;
     const operator = $("operator").value;
     const num2 = parseFloat($("num2").value) || 0;
-    const result = parseFloat($("result").value) || 0;
     
-    if(num1 === 0 || !operator || num2 === 0 || result === 0){
+    if(num1 === 0 || !operator || num2 === 0){
         showError("すべての欄に数値・記号を入力してください");
         return;
     }
@@ -647,10 +633,9 @@ function submitEquation(){
     const tolerance = 0.01;
     const isCorrect = Math.abs(num1 - state.prob.num1) < tolerance &&
                      operator === state.prob.operator &&
-                     Math.abs(num2 - state.prob.num2) < tolerance &&
-                     Math.abs(result - state.prob.result) < tolerance;
+                     Math.abs(num2 - state.prob.num2) < tolerance;
     
-    const correctEq = `${state.prob.num1} ${state.prob.operator} ${state.prob.num2} = ${state.prob.result}${state.unit}`;
+    const correctEq = `${state.prob.num1} ${state.prob.operator} ${state.prob.num2}`;
     handleAnswer(isCorrect, correctEq);
 }
 
