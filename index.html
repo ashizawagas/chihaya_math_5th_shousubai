@@ -49,6 +49,8 @@ button:hover{background:#45a049}
 .mode-btn.practice:hover{background:#f57c00}
 .mode-btn.select{background:#9c27b0}
 .mode-btn.select:hover{background:#7b1fa2}
+.mode-btn.formula{background:#e91e63}
+.mode-btn.formula:hover{background:#c2185b}
 .mode-btn.hidden{background:#ff6b6b;animation:hiddenPulse 2s infinite}
 .mode-btn.hidden:hover{background:#d32f2f}
 @keyframes hiddenPulse{0%,100%{transform:scale(1);box-shadow:0 0 10px #ff6b6b}50%{transform:scale(1.05);box-shadow:0 0 20px #ff6b6b}}
@@ -60,6 +62,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .progress-bar.practice{background:#ff9800}
 .progress-bar.summary{background:#f44336}
 .progress-bar.select{background:#9c27b0}
+.progress-bar.formula{background:#e91e63}
 .progress-bar.hidden{background:linear-gradient(45deg,#ff6b6b,#ffd700,#4caf50,#2196f3);background-size:400% 400%;animation:hiddenProgress 3s ease infinite}
 @keyframes hiddenProgress{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
 .info{padding:15px;background:white;border-radius:10px;margin:15px 0}
@@ -67,6 +70,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .mode-info.practice{background:#fff3e0;color:#f57c00;border:2px solid #ff9800}
 .mode-info.summary{background:#ffebee;color:#d32f2f;border:2px solid #f44336}
 .mode-info.select{background:#f3e5f5;color:#7b1fa2;border:2px solid #9c27b0}
+.mode-info.formula{background:#fce4ec;color:#c2185b;border:2px solid #e91e63}
 .mode-info.hidden{background:linear-gradient(45deg,#ffebee,#fff3e0,#e8f5e8,#e3f2fd);color:#d32f2f;border:2px solid #ff6b6b;animation:hiddenGlow 2s infinite}
 @keyframes hiddenGlow{0%,100%{box-shadow:0 0 10px rgba(255,107,107,0.3)}50%{box-shadow:0 0 20px rgba(255,107,107,0.6)}}
 .clear-screen{background:linear-gradient(45deg,#ff9a9e,#fecfef);animation:rainbow 3s infinite;padding:40px;border-radius:20px;margin:20px}
@@ -76,6 +80,10 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .answer-section h3{margin:0 0 10px 0;color:#2196f3;font-size:16px}
 .normal-input{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0}
 .normal-input input{width:150px;text-align:center}
+.formula-input{display:flex;align-items:center;justify-content:center;gap:10px;margin:10px 0;flex-wrap:wrap}
+.formula-input input{width:100px;text-align:center;font-size:16px}
+.formula-input select{width:80px;text-align:center;font-size:16px;padding:8px;border:2px solid #ddd;border-radius:5px}
+.formula-input select:focus{border-color:#e91e63;outline:none;box-shadow:0 0 5px rgba(233,30,99,.3)}
 .unit-display{font-size:16px;font-weight:bold;color:#666;margin-left:10px}
 .submit-btn{padding:12px 20px;font-size:16px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer}
 .submit-btn:hover{background:#45a049}
@@ -126,6 +134,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .global-ranking-item{display:flex;justify-content:space-between;align-items:center;padding:10px 15px;margin:5px 0;border-radius:5px;background:#fff8e1}
 .global-ranking-item.my-rank{background:#e8f5e8;border:2px solid #4caf50;font-weight:bold}
 .level-clear-screen{background:linear-gradient(45deg,#ff9a9e,#fecfef);animation:rainbow 3s infinite;padding:40px;border-radius:20px;margin:20px}
+.formula-hint{background:#fff3e0;color:#f57c00;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #ff9800;font-size:14px}
 </style>
 </head>
 <body>
@@ -137,11 +146,13 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="pointsDisplay" class="points-display" style="display:none">💰 総ポイント: <span id="totalPoints">0</span>P</div>
 <div class="info">
 <div class="mode-info select"><h3>🎮 選べるモード</h3><p>• 好きなレベルを選んで練習<br>• 10問連続正解でレベルクリア<br>• 正解でポイント獲得（少なめ）</p></div>
+<div class="mode-info formula"><h3>📝 式だけモード</h3><p>• 立式の練習に特化<br>• 計算結果ではなく式を入力<br>• 数学的思考力を鍛える</p></div>
 <div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る<br>• レベルアップでボーナスポイント（中程度）</p></div>
 <div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全5レベル×各5問＝計25問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>クリアで隠しステージ解放！</strong></p></div>
 <div id="hiddenModeInfo" class="mode-info hidden" style="display:none"><h3>👑 隠しステージ</h3><p>• 超高難度の小数の倍問題に挑戦<br>• 全10問クリアで「小数の倍マスター」の称号獲得<br>• 派手なアニメーションで祝福！</p></div>
 </div>
 <button class="mode-btn select" onclick="showLevelSelect()">🎮 選べるモード</button>
+<button class="mode-btn formula" onclick="showFormulaLevelSelect()">📝 式だけモード</button>
 <button class="mode-btn practice" onclick="selectMode('practice')">📚 練習モード</button>
 <button class="mode-btn" onclick="selectMode('summary')">🎯 まとめモード</button>
 <button id="hiddenStageBtn" class="mode-btn hidden" onclick="selectMode('hidden')" style="display:none">👑 隠しステージ</button>
@@ -162,6 +173,18 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <button onclick="backToStart()">トップ画面にもどる</button>
 </div>
 
+<div id="formulaLevelSelect" style="display:none">
+<h2>📝 式だけモード - レベルを選択してください</h2>
+<div class="level-select">
+<div class="level-btn" onclick="selectFormulaLevel(1)"><h4>✖️ レベル1</h4><p>何倍か</p></div>
+<div class="level-btn" onclick="selectFormulaLevel(2)"><h4>📏 レベル2</h4><p>もとにする大きさ</p></div>
+<div class="level-btn" onclick="selectFormulaLevel(3)"><h4>✨ レベル3</h4><p>小数倍した数</p></div>
+<div class="level-btn" onclick="selectFormulaLevel(4)"><h4>🔢 レベル4</h4><p>もとの何倍か</p></div>
+<div class="level-btn" onclick="selectFormulaLevel(5)"><h4>🎯 レベル5</h4><p>いろいろな問題</p></div>
+</div>
+<button onclick="backToStart()">トップ画面にもどる</button>
+</div>
+
 <div id="game" style="display:none">
 <div class="info">
 <div id="modeDisplay"></div>
@@ -176,6 +199,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div class="nav-buttons">
 <button class="nav-btn" onclick="backToStart()">トップ画面にもどる</button>
 <button class="nav-btn" id="levelSelectBtn" onclick="backToLevelSelect()" style="display:none">レベル選択にもどる</button>
+<button class="nav-btn" id="formulaLevelSelectBtn" onclick="backToFormulaLevelSelect()" style="display:none">式だけモード選択にもどる</button>
 </div>
 
 <div class="level-indicator" id="levelIndicator"></div>
@@ -183,10 +207,24 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div class="question" id="q"></div>
 
 <div class="answer-section">
-<h3>答えを入力してください</h3>
-<div class="normal-input">
+<h3 id="answerTitle">答えを入力してください</h3>
+<div class="normal-input" id="normalInput">
 <input type="text" id="norm" placeholder="答えを入力">
 <div id="nUnit" class="unit-display" style="display:none"></div>
+</div>
+<div class="formula-input" id="formulaInput" style="display:none">
+<input type="number" id="num1" placeholder="数値" step="0.01">
+<select id="operator">
+<option value="">演算子</option>
+<option value="÷">÷</option>
+<option value="×">×</option>
+<option value="+">+</option>
+<option value="-">-</option>
+</select>
+<input type="number" id="num2" placeholder="数値" step="0.01">
+</div>
+<div id="formulaHint" class="formula-hint" style="display:none">
+💡 ヒント: 左の欄に数値、真ん中で演算子を選択、右の欄に数値を入力してください
 </div>
 <button class="submit-btn" onclick="submitAnswer()">答える</button>
 </div>
@@ -196,9 +234,11 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="correctAnswer" class="correct-answer" style="display:none"><strong>正解：</strong><span id="correctText"></span></div>
 <div id="practiceMsg" style="display:none"><p>このレベルのカウントが0に戻ります。頑張って！</p></div>
 <div id="selectMsg" style="display:none"><p>連続正解カウントが0に戻ります。もう一度挑戦しましょう！</p></div>
+<div id="formulaMsg" style="display:none"><p>連続正解カウントが0に戻ります。立式を見直してみましょう！</p></div>
 <button onclick="retry()">もう一度</button>
 <button onclick="next()">つぎへ</button>
 <button id="backToSelectBtn" onclick="backToLevelSelect()" style="display:none">レベル選択に戻る</button>
+<button id="backToFormulaSelectBtn" onclick="backToFormulaLevelSelect()" style="display:none">式だけモード選択に戻る</button>
 </div>
 
 <div class="status">
@@ -206,6 +246,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <span id="totalQ" style="display:none"> / 25問中</span>
 <span id="hiddenQ" style="display:none"> / 10問中</span>
 <span id="selectQ" style="display:none"> / 10問中</span>
+<span id="formulaQ" style="display:none"> / 10問中</span>
 </div>
 </div>
 
@@ -255,6 +296,7 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 <div id="levelClearPoints" class="points-earned">🎉 獲得ポイント: <span id="levelClearPointsValue">0</span>P</div>
 </div>
 <button onclick="backToLevelSelect()">レベル選択に戻る</button>
+<button id="backToFormulaSelectFromClear" onclick="backToFormulaLevelSelect()" style="display:none">式だけモード選択に戻る</button>
 </div>
 
 <div id="hiddenClear" style="display:none">
@@ -277,6 +319,24 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 </div>
 
 <div id="celebration" class="correct-celebration"></div>
+
+<!-- 手書き計算スペース（常時表示） -->
+<div id="handwritingSpace" style="margin-top:40px;padding:20px;background:#f0f8ff;border-radius:15px;border:3px solid #2196f3">
+<div class="info">
+<h2 style="color:#2196f3;margin:0 0 15px 0">📝 手書き計算スペース</h2>
+<p style="margin:0 0 15px 0;color:#666">マウスや指で自由に計算式や図を書けます</p>
+</div>
+<div style="background:white;border-radius:10px;padding:20px;border:2px solid #2196f3">
+<!-- クリアボタンを上部に移動 -->
+<div style="margin-bottom:15px;text-align:center">
+<button onclick="clearDrawCanvas()" style="background:#ff9800;color:white;border:none;padding:10px 20px;border-radius:6px;margin:5px;cursor:pointer;font-size:14px">🗑️ クリア</button>
+</div>
+<canvas id="drawArea" width="800" height="500" style="border:2px solid #2196f3;border-radius:8px;background:#fff;touch-action:none;display:block;margin:0 auto;cursor:crosshair"></canvas>
+<div style="font-size:14px;color:#666;margin-top:15px;text-align:center;background:#f8f9fa;padding:10px;border-radius:6px">
+💡 ヒント: 筆算や図を描いて問題を解いてみましょう！小数の位取りや計算過程を書くと理解が深まります。
+</div>
+</div>
+</div>
 
 <script>
 // Firebase関連の関数
@@ -428,7 +488,7 @@ async function displayFirebaseRanking() {
 }
 
 const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',value:'',classList:{add:()=>{},remove:()=>{}},appendChild:()=>{},remove:()=>{},focus:()=>{}};
-let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0,selectCorrectCount:0,clearedLevels:new Set()};
+let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0,selectCorrectCount:0,clearedLevels:new Set(),formulaCorrectCount:0};
 const monsters=["✖️","📏","✨","🔢","🎯"];
 const lvNames=["何倍か","もとにする大きさ","小数倍した数","もとの何倍か","いろいろな問題"];
 let totalPoints=0,hiddenStageAvailable=false,playerId='';
@@ -602,6 +662,7 @@ function calculateLevelPoints(level,mode){
     const basePoints = level*50;
     if(mode==='practice')return Math.floor(basePoints*0.3);
     else if(mode==='select')return Math.floor(basePoints*0.5);
+    else if(mode==='formula')return Math.floor(basePoints*0.4);
     else return basePoints;
 }
 
@@ -609,6 +670,7 @@ function calculateCorrectPoints(level,mode){
     const basePoints = Math.min(level*10,100);
     if(mode==='practice')return Math.floor(basePoints*0.3);
     else if(mode==='select')return Math.floor(basePoints*0.1);
+    else if(mode==='formula')return Math.floor(basePoints*0.2);
     else return basePoints;
 }
 
@@ -770,6 +832,7 @@ function generateProblem(lv){
                     return{
                         q:`${result.dividend}ｍの赤いリボンと、${result.divisor}ｍの青いリボンがあります。${askFor}リボンは${baseFor}リボンの何倍ですか？`,
                         answer:result.answer,
+                        formula:`${result.dividend}÷${result.divisor}`,
                         unit:"倍"
                     };
                 } else {
@@ -777,6 +840,7 @@ function generateProblem(lv){
                     return{
                         q:`${result.divisor}ｍの赤いリボンと、${result.dividend}ｍの青いリボンがあります。${askFor}リボンは${baseFor}リボンの何倍ですか？`,
                         answer:result.answer,
+                        formula:`${result.dividend}÷${result.divisor}`,
                         unit:"倍"
                     };
                 }
@@ -786,6 +850,7 @@ function generateProblem(lv){
                 return{
                     q:`はるかさんの家から駅までは${result.divisor}ｋｍです。ひろしさんの家から駅までは${result.dividend}ｋｍです。はるかさんの道のりをもとにすると、ひろしさんの道のりは何倍ですか？`,
                     answer:result.answer,
+                    formula:`${result.dividend}÷${result.divisor}`,
                     unit:"倍"
                 };
             }
@@ -800,6 +865,7 @@ function generateProblem(lv){
                 return{
                     q:`犬の体重は${currentWeight}ｇです。生まれたときの${result.divisor}倍です。生まれた時の体重は何ｇでしたか？`,
                     answer:roundToTwoDecimals(currentWeight / result.divisor),
+                    formula:`${currentWeight}÷${result.divisor}`,
                     unit:"ｇ"
                 };
             }else{
@@ -809,6 +875,7 @@ function generateProblem(lv){
                 return{
                     q:`へちまのくきの長さは${currentLength}ｃｍです。半年前の${result.divisor}倍です。半年前のくきの長さは何ｃｍでしたか？`,
                     answer:roundToTwoDecimals(currentLength / result.divisor),
+                    formula:`${currentLength}÷${result.divisor}`,
                     unit:"ｃｍ"
                 };
             }
@@ -825,6 +892,7 @@ function generateProblem(lv){
                 return{
                     q:`赤いテープは${baseLength}ｍです。青いテープは赤いテープの${multiplier}倍です。青いテープの長さは何ｍですか？`,
                     answer:resultLength,
+                    formula:`${baseLength}×${multiplier}`,
                     unit:"ｍ"
                 };
             }else{
@@ -836,6 +904,7 @@ function generateProblem(lv){
                 return{
                     q:`肉を${baseWeight}ｋｇ買いました。野菜は肉の${multiplier}倍買いました。買った野菜の重さは何ｋｇですか？`,
                     answer:resultWeight,
+                    formula:`${baseWeight}×${multiplier}`,
                     unit:"ｋｇ"
                 };
             }
@@ -851,6 +920,7 @@ function generateProblem(lv){
                 return{
                     q:`おにぎりが${originalPrice}円から値引きされて、${currentPrice}円になりました。値引き後の値段はもとの値段の何倍ですか？`,
                     answer:roundToTwoDecimals(currentPrice / originalPrice),
+                    formula:`${currentPrice}÷${originalPrice}`,
                     unit:"倍"
                 };
             }else{
@@ -861,6 +931,7 @@ function generateProblem(lv){
                 return{
                     q:`お弁当が${originalPrice}円から値引きされて、${currentPrice}円になりました。値引き後の値段はもとの値段の何倍ですか？`,
                     answer:roundToTwoDecimals(currentPrice / originalPrice),
+                    formula:`${currentPrice}÷${originalPrice}`,
                     unit:"倍"
                 };
             }
@@ -873,6 +944,50 @@ function generateProblem(lv){
     }
 }
 
+// 式だけモード用の関数
+function showFormulaLevelSelect(){
+    $("start").style.display="none";
+    $("formulaLevelSelect").style.display="block";
+}
+
+function selectFormulaLevel(level){
+    state.level = level;
+    state.score = 0;
+    state.lvCount = 0;
+    state.totalQ = 0;
+    state.qNum = 0;
+    state.formulaCorrectCount = 0;
+    state.sessionPoints = 0;
+    
+    $("start").style.display = "none";
+    $("formulaLevelSelect").style.display = "none";
+    $("game").style.display = "block";
+    
+    state.mode = 'formula';
+    $("formulaLevelSelectBtn").style.display = "inline-block";
+    $("formulaQ").style.display = "inline-block";
+    $("totalQ").style.display = "none";
+    $("hiddenQ").style.display = "none";
+    $("selectQ").style.display = "none";
+    $("modeDisplay").innerHTML = `<div class="mode-info formula"><strong>📝 式だけモード</strong> - レベル${state.level}</div>`;
+    $("progressBar").className = "progress-bar formula";
+    
+    // 式だけモード用のUI表示
+    $("answerTitle").textContent = "式を入力してください";
+    $("normalInput").style.display = "none";
+    $("formulaInput").style.display = "flex";
+    $("formulaHint").style.display = "block";
+    
+    updateLevelIndicator();
+    updateProgressBar();
+    newProblem();
+}
+
+function backToFormulaLevelSelect(){
+    $("game").style.display="none";
+    $("levelClear").style.display="none";
+    $("formulaLevelSelect").style.display="block";
+}
 
 function selectLevel(level){
     state.level = level;
@@ -893,8 +1008,15 @@ function selectLevel(level){
     $("selectQ").style.display = "inline-block";
     $("totalQ").style.display = "none";
     $("hiddenQ").style.display = "none";
+    $("formulaQ").style.display = "none";
     $("modeDisplay").innerHTML = `<div class="mode-info select"><strong>🎮 選べるモード</strong> - レベル${state.level}</div>`;
     $("progressBar").className = "progress-bar select";
+    
+    // 通常モード用のUI表示
+    $("answerTitle").textContent = "答えを入力してください";
+    $("normalInput").style.display = "flex";
+    $("formulaInput").style.display = "none";
+    $("formulaHint").style.display = "none";
     
     updateLevelIndicator();
     updateProgressBar();
@@ -911,38 +1033,70 @@ function selectMode(mode){
     state.selectQCount=0;
     state.hiddenQ=0;
     state.selectCorrectCount=0;
+    state.formulaCorrectCount=0;
     state.sessionPoints=0;
     
     $("start").style.display="none";
     $("levelSelect").style.display="none";
+    $("formulaLevelSelect").style.display="none";
     $("game").style.display="block";
     
     if(mode==='select'){
         $("game").style.display="none";
         showLevelSelect();
         return;
+    }else if(mode==='formula'){
+        $("game").style.display="none";
+        showFormulaLevelSelect();
+        return;
     }else if(mode==='practice'){
         $("levelSelectBtn").style.display="none";
+        $("formulaLevelSelectBtn").style.display="none";
         $("selectQ").style.display="none";
+        $("formulaQ").style.display="none";
         $("totalQ").style.display="none";
         $("hiddenQ").style.display="none";
         $("modeDisplay").innerHTML='<div class="mode-info practice"><strong>📚 練習モード</strong></div>';
         $("progressBar").className="progress-bar practice";
+        
+        // 通常モード用のUI表示
+        $("answerTitle").textContent = "答えを入力してください";
+        $("normalInput").style.display = "flex";
+        $("formulaInput").style.display = "none";
+        $("formulaHint").style.display = "none";
     }else if(mode==='summary'){
         $("levelSelectBtn").style.display="none";
+        $("formulaLevelSelectBtn").style.display="none";
         $("selectQ").style.display="none";
+        $("formulaQ").style.display="none";
         $("totalQ").style.display="inline-block";
         $("hiddenQ").style.display="none";
         $("modeDisplay").innerHTML='<div class="mode-info summary"><strong>🎯 まとめモード</strong></div>';
         $("progressBar").className="progress-bar summary";
+        
+        // 通常モード用のUI表示
+        $("answerTitle").textContent = "答えを入力してください";
+        $("normalInput").style.display = "flex";
+        $("formulaInput").style.display = "none";
+        $("formulaHint").style.display = "none";
+        
         startTimer();
     }else if(mode==='hidden'){
         $("levelSelectBtn").style.display="none";
+        $("formulaLevelSelectBtn").style.display="none";
         $("selectQ").style.display="none";
+        $("formulaQ").style.display="none";
         $("totalQ").style.display="none";
         $("hiddenQ").style.display="inline-block";
         $("modeDisplay").innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong></div>';
         $("progressBar").className="progress-bar hidden";
+        
+        // 通常モード用のUI表示
+        $("answerTitle").textContent = "答えを入力してください";
+        $("normalInput").style.display = "flex";
+        $("formulaInput").style.display = "none";
+        $("formulaHint").style.display = "none";
+        
         startTimer();
     }
     
@@ -964,6 +1118,7 @@ function backToStart(){
     $("levelClear").style.display="none";
     $("hiddenClear").style.display="none";
     $("levelSelect").style.display="none";
+    $("formulaLevelSelect").style.display="none";
     $("start").style.display="block";
     stopTimer();
     
@@ -982,7 +1137,7 @@ function updateLevelIndicator(){
     const indicator=$("levelIndicator");
     indicator.innerHTML="";
     
-    const maxLevels=state.mode==='hidden'?10:5; // 5レベル対応
+    const maxLevels=state.mode==='hidden'?10:5;
     
     if(state.mode==='practice'){
         for(let i=1;i<=maxLevels;i++){
@@ -1020,6 +1175,15 @@ function updateLevelIndicator(){
             dot.textContent=i;
             indicator.appendChild(dot);
         }
+    }else if(state.mode==='formula'){
+        for(let i=1;i<=10;i++){
+            const dot=document.createElement("div");
+            dot.className="level-dot";
+            if(i<=state.formulaCorrectCount)dot.classList.add("completed");
+            if(i===state.formulaCorrectCount+1)dot.classList.add("current");
+            dot.textContent=i;
+            indicator.appendChild(dot);
+        }
     }
 }
 
@@ -1031,7 +1195,7 @@ function updateProgressBar(){
         progress=(state.lvCount/5)*100;
         $("levelProgress").textContent=`このレベル: ${state.lvCount}/5問正解`;
     }else if(state.mode==='summary'){
-        progress=(state.totalQ/25)*100; // 5レベル×5問=25問
+        progress=(state.totalQ/25)*100;
         $("levelProgress").textContent="";
     }else if(state.mode==='hidden'){
         progress=(state.hiddenQ/10)*100;
@@ -1039,6 +1203,9 @@ function updateProgressBar(){
     }else if(state.mode==='select'){
         progress=(state.selectCorrectCount/10)*100;
         $("levelProgress").textContent=`連続正解: ${state.selectCorrectCount}/10問`;
+    }else if(state.mode==='formula'){
+        progress=(state.formulaCorrectCount/10)*100;
+        $("levelProgress").textContent=`連続正解: ${state.formulaCorrectCount}/10問`;
     }
     
     progressBar.style.width=progress+"%";
@@ -1048,12 +1215,12 @@ function newProblem(){
     state.prob=generateProblem(state.level);
     state.unit=state.prob.unit||"";
     $("q").innerHTML=state.prob.q;
-    $("monster").textContent=monsters[Math.min(state.level-1, 4)]; // 配列範囲外防止
+    $("monster").textContent=monsters[Math.min(state.level-1, 4)];
     $("lv").textContent=state.level;
-    $("lvInfo").textContent=lvNames[Math.min(state.level-1, 4)]; // 配列範囲外防止
+    $("lvInfo").textContent=lvNames[Math.min(state.level-1, 4)];
     
     // 単位表示の更新
-    if(state.unit){
+    if(state.unit && state.mode !== 'formula'){
         $("nUnit").textContent=state.unit;
         $("nUnit").style.display="inline";
     }else{
@@ -1062,16 +1229,31 @@ function newProblem(){
     
     // 入力フィールドのクリア
     $("norm").value="";
+    $("num1").value="";
+    $("num2").value="";
+    $("operator").value="";
     
     $("wrong").style.display="none";
     
     // カーソル位置を適切な入力欄に設定
     setTimeout(() => {
-        $("norm").focus();
+        if(state.mode === 'formula'){
+            $("num1").focus();
+        }else{
+            $("norm").focus();
+        }
     }, 100);
 }
 
 function submitAnswer(){
+    if(state.mode === 'formula'){
+        submitFormulaAnswer();
+    }else{
+        submitNormalAnswer();
+    }
+}
+
+function submitNormalAnswer(){
     const input=$("norm").value.trim();
     if(!input){
         alert('答えを入力してください');
@@ -1090,6 +1272,26 @@ function submitAnswer(){
         handleCorrect();
     }else{
         handleWrong(correctAnswer.toString());
+    }
+}
+
+function submitFormulaAnswer(){
+    const num1=$("num1").value.trim();
+    const operator=$("operator").value;
+    const num2=$("num2").value.trim();
+    
+    if(!num1 || !operator || !num2){
+        alert('すべての欄を入力してください');
+        return;
+    }
+    
+    const userFormula = `${num1}${operator}${num2}`;
+    const correctFormula = state.prob.formula;
+    
+    if(userFormula === correctFormula){
+        handleCorrect();
+    }else{
+        handleWrong(correctFormula);
     }
 }
 
@@ -1113,7 +1315,7 @@ async function handleCorrect(){
             $("monster").classList.add("level-up");
             setTimeout(()=>$("monster").classList.remove("level-up"),3000);
             
-            if(state.level<5){ // 5レベル対応
+            if(state.level<5){
                 state.level++;
                 state.lvCount=0;
             }else{
@@ -1126,7 +1328,7 @@ async function handleCorrect(){
         }
     }else if(state.mode==='summary'){
         state.totalQ++;
-        if(state.totalQ>=25){ // 25問対応
+        if(state.totalQ>=25){
             stopTimer();
             const clearTime=getElapsedTime();
             enableHiddenStage();
@@ -1146,7 +1348,6 @@ async function handleCorrect(){
         state.selectQCount++;
         state.selectCorrectCount++;
         
-        // 10問連続正解でレベルクリア
         if(state.selectCorrectCount>=10){
             state.clearedLevels.add(state.level);
             saveClearedLevels();
@@ -1155,6 +1356,19 @@ async function handleCorrect(){
             await addPoints(levelClearPoints);
             
             setTimeout(()=>showLevelClear(),1000);
+            return;
+        }
+    }else if(state.mode==='formula'){
+        state.formulaCorrectCount++;
+        
+        if(state.formulaCorrectCount>=10){
+            state.clearedLevels.add(state.level);
+            saveClearedLevels();
+            
+            const levelClearPoints=calculateLevelPoints(state.level,state.mode) * 2;
+            await addPoints(levelClearPoints);
+            
+            setTimeout(()=>showFormulaLevelClear(),1000);
             return;
         }
     }
@@ -1171,18 +1385,29 @@ function handleWrong(correctAnswer){
     if(state.mode==='practice'){
         $("practiceMsg").style.display="block";
         $("selectMsg").style.display="none";
+        $("formulaMsg").style.display="none";
         $("backToSelectBtn").style.display="none";
+        $("backToFormulaSelectBtn").style.display="none";
         state.lvCount=0;
     }else if(state.mode==='summary'||state.mode==='hidden'){
         stopTimer();
         const finalTime=getElapsedTime();
         setTimeout(()=>showGameOver(finalTime),2000);
         return;
-    }else{
+    }else if(state.mode==='select'){
         $("practiceMsg").style.display="none";
         $("selectMsg").style.display="block";
+        $("formulaMsg").style.display="none";
         $("backToSelectBtn").style.display="inline-block";
+        $("backToFormulaSelectBtn").style.display="none";
         state.selectCorrectCount=0;
+    }else if(state.mode==='formula'){
+        $("practiceMsg").style.display="none";
+        $("selectMsg").style.display="none";
+        $("formulaMsg").style.display="block";
+        $("backToSelectBtn").style.display="none";
+        $("backToFormulaSelectBtn").style.display="inline-block";
+        state.formulaCorrectCount=0;
     }
     
     $("monster").classList.add("wrong");
@@ -1248,6 +1473,21 @@ async function showLevelClear(){
     
     const levelClearPoints=calculateLevelPoints(state.level,state.mode) * 2;
     $("levelClearPointsValue").textContent=levelClearPoints;
+    
+    $("backToFormulaSelectFromClear").style.display="none";
+    
+    createFireworks();
+}
+
+async function showFormulaLevelClear(){
+    $("game").style.display="none";
+    $("levelClear").style.display="block";
+    $("clearedLevel").textContent=state.level;
+    
+    const levelClearPoints=calculateLevelPoints(state.level,state.mode) * 2;
+    $("levelClearPointsValue").textContent=levelClearPoints;
+    
+    $("backToFormulaSelectFromClear").style.display="inline-block";
     
     createFireworks();
 }
@@ -1346,34 +1586,17 @@ try{
 // Enterキーでの回答送信
 document.addEventListener('keydown',function(e){
     if(e.key==='Enter'&&$("game").style.display==="block"){
-        if($("norm").value){
+        if(state.mode === 'formula'){
+            // 式だけモードでは、最後の入力欄からEnterで送信
+            if(document.activeElement === $("num2") && $("num1").value && $("operator").value && $("num2").value){
+                submitAnswer();
+            }
+        }else if(state.mode !== 'formula' && $("norm").value){
             submitAnswer();
         }
     }
 });
-</script>
-</body>
-</html>
 
-<!-- 手書き計算スペース（常時表示） -->
-<div id="handwritingSpace" style="margin-top:40px;padding:20px;background:#f0f8ff;border-radius:15px;border:3px solid #2196f3">
-<div class="info">
-<h2 style="color:#2196f3;margin:0 0 15px 0">📝 手書き計算スペース</h2>
-<p style="margin:0 0 15px 0;color:#666">マウスや指で自由に計算式や図を書けます</p>
-</div>
-<div style="background:white;border-radius:10px;padding:20px;border:2px solid #2196f3">
-<!-- クリアボタンを上部に移動 -->
-<div style="margin-bottom:15px;text-align:center">
-<button onclick="clearDrawCanvas()" style="background:#ff9800;color:white;border:none;padding:10px 20px;border-radius:6px;margin:5px;cursor:pointer;font-size:14px">🗑️ クリア</button>
-</div>
-<canvas id="drawArea" width="800" height="500" style="border:2px solid #2196f3;border-radius:8px;background:#fff;touch-action:none;display:block;margin:0 auto;cursor:crosshair"></canvas>
-<div style="font-size:14px;color:#666;margin-top:15px;text-align:center;background:#f8f9fa;padding:10px;border-radius:6px">
-💡 ヒント: 筆算や図を描いて問題を解いてみましょう！小数の位取りや計算過程を書くと理解が深まります。
-</div>
-</div>
-</div>
-
-<script>
 // 手書き描画機能の変数（名前を変更して競合を回避）
 let drawCanvas, drawCtx, isDrawingNow = false;
 
@@ -1513,3 +1736,5 @@ function manualInitDraw() {
   initDrawingSpace();
 }
 </script>
+</body>
+</html>
