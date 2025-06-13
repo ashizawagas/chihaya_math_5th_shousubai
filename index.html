@@ -43,6 +43,7 @@ body{font-family:Arial;text-align:center;background:#f0f8ff;margin:0;padding:20p
 .question{font-size:24px;margin:20px;padding:20px;background:white;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.1)}
 button{margin:10px;padding:12px 24px;font-size:16px;border:none;border-radius:8px;background:#4CAF50;color:white;cursor:pointer}
 button:hover{background:#45a049}
+button:disabled{background:#ccc;cursor:not-allowed}
 .mode-btn{background:#2196f3;padding:15px 30px;font-size:18px;margin:20px}
 .mode-btn:hover{background:#1976d2}
 .mode-btn.practice{background:#ff9800}
@@ -56,6 +57,7 @@ button:hover{background:#45a049}
 @keyframes hiddenPulse{0%,100%{transform:scale(1);box-shadow:0 0 10px #ff6b6b}50%{transform:scale(1.05);box-shadow:0 0 20px #ff6b6b}}
 input{font-size:18px;padding:10px;border:2px solid #ddd;border-radius:5px;margin:10px}
 input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243,.3)}
+input:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
 .status{margin:15px 0;font-size:18px}
 .progress{background:#e0e0e0;border-radius:10px;margin:15px 0;height:20px;overflow:hidden}
 .progress-bar{height:100%;transition:width .3s}
@@ -84,9 +86,11 @@ input:focus{border-color:#2196f3;outline:none;box-shadow:0 0 5px rgba(33,150,243
 .formula-input input{width:100px;text-align:center;font-size:16px}
 .formula-input select{width:80px;text-align:center;font-size:16px;padding:8px;border:2px solid #ddd;border-radius:5px}
 .formula-input select:focus{border-color:#e91e63;outline:none;box-shadow:0 0 5px rgba(233,30,99,.3)}
+.formula-input select:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
 .unit-display{font-size:16px;font-weight:bold;color:#666;margin-left:10px}
 .submit-btn{padding:12px 20px;font-size:16px;background:#4CAF50;color:white;border:none;border-radius:8px;cursor:pointer}
 .submit-btn:hover{background:#45a049}
+.submit-btn:disabled{background:#ccc;cursor:not-allowed}
 .level-indicator{display:flex;justify-content:center;gap:8px;margin:15px 0;flex-wrap:wrap}
 .level-dot{width:25px;height:25px;border-radius:50%;background:#e0e0e0;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:bold}
 .level-dot.completed{background:#4caf50;color:white}
@@ -487,8 +491,8 @@ async function displayFirebaseRanking() {
     document.body.appendChild(rankingDialog);
 }
 
-const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',value:'',classList:{add:()=>{},remove:()=>{}},appendChild:()=>{},remove:()=>{},focus:()=>{}};
-let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0,selectCorrectCount:0,clearedLevels:new Set(),formulaCorrectCount:0};
+const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',value:'',classList:{add:()=>{},remove:()=>{}},appendChild:()=>{},remove:()=>{},focus:()=>{},disabled:false};
+let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0,selectCorrectCount:0,clearedLevels:new Set(),formulaCorrectCount:0,answerSubmitted:false};
 const monsters=["✖️","📏","✨","🔢","🎯"];
 const lvNames=["何倍か","もとにする大きさ","小数倍した数","もとの何倍か","いろいろな問題"];
 let totalPoints=0,hiddenStageAvailable=false,playerId='';
@@ -815,6 +819,7 @@ function generateHiddenProblem(){
     }
 }
 
+
 function generateProblem(lv){
     if(state.mode==='hidden')return generateHiddenProblem();
     
@@ -958,6 +963,7 @@ function selectFormulaLevel(level){
     state.qNum = 0;
     state.formulaCorrectCount = 0;
     state.sessionPoints = 0;
+    state.answerSubmitted = false; // 回答送信フラグをリセット
     
     $("start").style.display = "none";
     $("formulaLevelSelect").style.display = "none";
@@ -998,6 +1004,7 @@ function selectLevel(level){
     state.selectQCount = 0;
     state.selectCorrectCount = 0;
     state.sessionPoints = 0;
+    state.answerSubmitted = false; // 回答送信フラグをリセット
     
     $("start").style.display = "none";
     $("levelSelect").style.display = "none";
@@ -1035,6 +1042,7 @@ function selectMode(mode){
     state.selectCorrectCount=0;
     state.formulaCorrectCount=0;
     state.sessionPoints=0;
+    state.answerSubmitted=false; // 回答送信フラグをリセット
     
     $("start").style.display="none";
     $("levelSelect").style.display="none";
@@ -1214,6 +1222,8 @@ function updateProgressBar(){
 function newProblem(){
     state.prob=generateProblem(state.level);
     state.unit=state.prob.unit||"";
+    state.answerSubmitted=false; // 新しい問題で回答送信フラグをリセット
+    
     $("q").innerHTML=state.prob.q;
     $("monster").textContent=monsters[Math.min(state.level-1, 4)];
     $("lv").textContent=state.level;
@@ -1233,6 +1243,10 @@ function newProblem(){
     $("num2").value="";
     $("operator").value="";
     
+    // 送信ボタンを有効化
+    const submitBtns = document.querySelectorAll('.submit-btn');
+    submitBtns.forEach(btn => btn.disabled = false);
+    
     $("wrong").style.display="none";
     
     // カーソル位置を適切な入力欄に設定
@@ -1246,6 +1260,17 @@ function newProblem(){
 }
 
 function submitAnswer(){
+    // 連打防止チェック
+    if(state.answerSubmitted){
+        return;
+    }
+    
+    state.answerSubmitted = true; // 回答送信フラグを設定
+    
+    // 送信ボタンを無効化
+    const submitBtns = document.querySelectorAll('.submit-btn');
+    submitBtns.forEach(btn => btn.disabled = true);
+    
     if(state.mode === 'formula'){
         submitFormulaAnswer();
     }else{
@@ -1257,12 +1282,18 @@ function submitNormalAnswer(){
     const input=$("norm").value.trim();
     if(!input){
         alert('答えを入力してください');
+        state.answerSubmitted = false; // エラー時はフラグをリセット
+        const submitBtns = document.querySelectorAll('.submit-btn');
+        submitBtns.forEach(btn => btn.disabled = false);
         return;
     }
     
     const userAnswer=parseFloat(input);
     if(isNaN(userAnswer)){
         alert('正しい数値を入力してください');
+        state.answerSubmitted = false; // エラー時はフラグをリセット
+        const submitBtns = document.querySelectorAll('.submit-btn');
+        submitBtns.forEach(btn => btn.disabled = false);
         return;
     }
     
@@ -1282,6 +1313,9 @@ function submitFormulaAnswer(){
     
     if(!num1 || !operator || !num2){
         alert('すべての欄を入力してください');
+        state.answerSubmitted = false; // エラー時はフラグをリセット
+        const submitBtns = document.querySelectorAll('.submit-btn');
+        submitBtns.forEach(btn => btn.disabled = false);
         return;
     }
     
@@ -1585,7 +1619,7 @@ try{
 
 // Enterキーでの回答送信
 document.addEventListener('keydown',function(e){
-    if(e.key==='Enter'&&$("game").style.display==="block"){
+    if(e.key==='Enter'&&$("game").style.display==="block"&&!state.answerSubmitted){
         if(state.mode === 'formula'){
             // 式だけモードでは、最後の入力欄からEnterで送信
             if(document.activeElement === $("num2") && $("num1").value && $("operator").value && $("num2").value){
