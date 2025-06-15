@@ -524,7 +524,7 @@ input:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
 <div class="info">
 <div class="mode-info select"><h3>🎮 選べるモード</h3><p>• 好きなレベルを選んで練習<br>• 10問連続正解でレベルクリア<br>• 正解でポイント獲得（少なめ）</p></div>
 <div class="mode-info formula"><h3>📝 式だけモード</h3><p>• 立式の練習に特化<br>• 計算結果ではなく式を入力<br>• 数学的思考力を鍛える</p></div>
-<div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る<br>• レベルアップでボーナスポイント（中程度）</p></div>
+<div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る<br>• <strong>レベルアップでボーナスゲーム！</strong><br>• レベルアップでボーナスポイント（中程度）</p></div>
 <div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全5レベル×各5問＝計25問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>各レベルクリアでボーナスゲーム！</strong><br>• <strong>クリアで隠しステージ解放！</strong></p></div>
 <div id="hiddenModeInfo" class="mode-info hidden" style="display:none"><h3>👑 隠しステージ</h3><p>• 超高難度の小数の倍問題に挑戦<br>• 全10問クリアで「小数の倍マスター」の称号獲得<br>• 派手なアニメーションで祝福！</p></div>
 </div>
@@ -779,7 +779,7 @@ input:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
                 <button class="bonus-back-btn" onclick="bonusGoHome()">🏠 ホームに戻る</button>
             </div>
 
-                     <!-- ゲーム終了画面 -->
+            <!-- ゲーム終了画面 -->
             <div class="bonus-game-over" id="bonusGameOver">
                 <div class="bonus-game-over-content">
                     <h2>🎉 ボーナスゲーム終了！</h2>
@@ -789,7 +789,7 @@ input:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
                     </div>
                     <div class="level-up-message">
                         <p>🎉 ボーナスポイントを獲得しました！ 🎉</p>
-                        <p>次のレベルに進みます！</p>
+                        <p id="bonusReturnMessage">次のレベルに進みます！</p>
                     </div>
                     <button class="bonus-start-game-btn" onclick="bonusReturnToMainGame()">次のレベルへ進む</button>
                 </div>
@@ -933,7 +933,7 @@ async function displayFirebaseRanking() {
         }
     }
     
-    rankingHTML += `
+       rankingHTML += `
             <button onclick="this.parentElement.parentElement.remove()" 
                     style="margin-top: 20px; padding: 12px 24px; font-size: 16px; 
                            background: #4CAF50; color: white; border: none; border-radius: 8px; 
@@ -963,6 +963,7 @@ let bonusBullets = [];
 let bonusGameInterval = null;
 let bonusIsSpinning = false;
 let pendingLevelUp = false; // レベルアップ待機フラグ
+let pendingLevelUpData = null; // レベルアップ時のデータ保存用
 
 // ボーナスゲームの表示
 function showBonusGame() {
@@ -1439,35 +1440,70 @@ function bonusShowGameOver() {
     }
     
     document.getElementById('bonusAchievements').innerHTML = achievements;
+    
+    // ボーナスゲーム終了時のメッセージを動的に変更
+    const returnMessage = document.getElementById('bonusReturnMessage');
+    if (returnMessage) {
+        if (pendingLevelUpData && pendingLevelUpData.mode === 'practice') {
+            returnMessage.textContent = '次のレベルに進みます！';
+        } else {
+            returnMessage.textContent = '次のレベルに進みます！';
+        }
+    }
 }
 
 // ボーナスゲームからメインゲームに戻る
 async function bonusReturnToMainGame() {
-    // ボーナスゲームで獲得したポイントをメインゲームに追加
-    if (bonusGameScore > 0) {
-        await addPoints(bonusGameScore, true);
-    }
-    
-    // ボーナスゲームを隠す
-    hideBonusGame();
-    
-    // 待機中のレベルアップ処理を実行
-    if (pendingLevelUp) {
-        pendingLevelUp = false;
-        
-        // まとめモードでレベルアップ処理
-        if (state.mode === 'summary') {
-            // レベルアップアニメーション
-            $("monster").classList.add("level-up");
-            setTimeout(() => $("monster").classList.remove("level-up"), 3000);
-            
-            setTimeout(() => {
-                state.level++;
-                updateLevelIndicator();
-                updateProgressBar();
-                newProblem();
-            }, 1000);
+    try {
+        // ボーナスゲームで獲得したポイントをメインゲームに追加
+        if (bonusGameScore > 0) {
+            await addPoints(bonusGameScore, true);
         }
+        
+        // ボーナスゲームを隠す
+        hideBonusGame();
+        
+        // 待機中のレベルアップ処理を実行
+        if (pendingLevelUp && pendingLevelUpData) {
+            pendingLevelUp = false;
+            
+            // 練習モードでのレベルアップ処理
+            if (pendingLevelUpData.mode === 'practice') {
+                // レベルアップアニメーション
+                $("monster").classList.add("level-up");
+                setTimeout(() => $("monster").classList.remove("level-up"), 3000);
+                
+                setTimeout(() => {
+                    state.level = pendingLevelUpData.newLevel;
+                    state.lvCount = 0;
+                    updateLevelIndicator();
+                    updateProgressBar();
+                    newProblem();
+                }, 1000);
+            }
+            // まとめモードでのレベルアップ処理
+            else if (pendingLevelUpData.mode === 'summary') {
+                // レベルアップアニメーション
+                $("monster").classList.add("level-up");
+                setTimeout(() => $("monster").classList.remove("level-up"), 3000);
+                
+                setTimeout(() => {
+                    state.level = pendingLevelUpData.newLevel;
+                    updateLevelIndicator();
+                    updateProgressBar();
+                    newProblem();
+                }, 1000);
+            }
+            
+            // レベルアップデータをクリア
+            pendingLevelUpData = null;
+        }
+    } catch (error) {
+        console.error('ボーナスゲーム終了処理でエラー:', error);
+        // エラーが発生してもゲームを続行
+        hideBonusGame();
+        pendingLevelUp = false;
+        pendingLevelUpData = null;
     }
 }
 
@@ -2108,7 +2144,7 @@ function selectMode(mode){
         $("modeDisplay").innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong></div>';
         $("progressBar").className="progress-bar hidden";
         
-               // 通常モード用のUI表示
+        // 通常モード用のUI表示
         $("answerTitle").textContent = "答えを入力してください";
         $("normalInput").style.display = "flex";
         $("formulaInput").style.display = "none";
@@ -2338,7 +2374,7 @@ function submitFormulaAnswer(){
     }
 }
 
-// handleCorrect関数を修正（競合回避版）
+// handleCorrect関数を修正（練習モードでもボーナスゲーム対応版）
 async function handleCorrect(){
     state.score++;
     $("score").textContent=state.score;
@@ -2356,12 +2392,20 @@ async function handleCorrect(){
             const levelPoints=calculateLevelPoints(state.level,state.mode);
             await addPoints(levelPoints);
             
-            $("monster").classList.add("level-up");
-            setTimeout(()=>$("monster").classList.remove("level-up"),3000);
-            
+            // 練習モードでもレベルアップ時にボーナスゲームを表示
             if(state.level<5){
-                state.level++;
-                state.lvCount=0;
+                // レベルアップ待機フラグを設定
+                pendingLevelUp = true;
+                pendingLevelUpData = {
+                    mode: 'practice',
+                    newLevel: state.level + 1
+                };
+                
+                // ボーナスゲームを表示
+                setTimeout(() => {
+                    showBonusGame();
+                }, 1500);
+                return; // ここで処理を停止し、ボーナスゲーム後に続行
             }else{
                 setTimeout(()=>{
                     alert('練習モード全レベル完了！おめでとうございます！');
@@ -2377,6 +2421,10 @@ async function handleCorrect(){
         if(state.totalQ % 5 === 0 && state.totalQ < 25) {
             // レベルクリア時の処理
             pendingLevelUp = true; // レベルアップ待機フラグを設定
+            pendingLevelUpData = {
+                mode: 'summary',
+                newLevel: state.level + 1
+            };
             
             // ボーナスゲームを表示
             setTimeout(() => {
