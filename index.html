@@ -139,6 +139,379 @@ input:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
 .global-ranking-item.my-rank{background:#e8f5e8;border:2px solid #4caf50;font-weight:bold}
 .level-clear-screen{background:linear-gradient(45deg,#ff9a9e,#fecfef);animation:rainbow 3s infinite;padding:40px;border-radius:20px;margin:20px}
 .formula-hint{background:#fff3e0;color:#f57c00;padding:10px;border-radius:8px;margin:10px 0;border:2px solid #ff9800;font-size:14px}
+
+/* ボーナスゲーム用のスタイル */
+.bonus-game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 10000;
+    display: none;
+    overflow: auto;
+}
+
+.bonus-game-container.active {
+    display: block;
+}
+
+.bonus-game-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* ボーナスゲーム内のスタイル（倍数シューティング用） */
+.bonus-game-content * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.bonus-game-content body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4, #feca57);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.bonus-container {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 30px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    text-align: center;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    overflow: hidden;
+    margin: 20px auto;
+}
+
+.bonus-container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shine 3s linear infinite;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.bonus-container h1 {
+    color: #ff6b6b;
+    font-size: 2.5em;
+    margin-bottom: 20px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+.bonus-roulette-setup, .bonus-game-setup, .bonus-shooting-game, .bonus-game-over {
+    display: none;
+}
+
+.bonus-roulette-setup.active, .bonus-game-setup.active, .bonus-shooting-game.active, .bonus-game-over.active {
+    display: block;
+}
+
+.bonus-setup-description {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px 0;
+    border-left: 5px solid #4ecdc4;
+}
+
+.bonus-setup-description h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.bonus-setup-description p {
+    color: #666;
+    font-size: 1em;
+    line-height: 1.5;
+}
+
+.bonus-roulette-container {
+    background: linear-gradient(45deg, #feca57, #ff9ff3);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 20px 0;
+    color: white;
+}
+
+.bonus-roulette-wheel {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 8px solid white;
+    margin: 20px auto;
+    position: relative;
+    background: conic-gradient(
+        #ff6b6b 0deg 45deg,
+        #4ecdc4 45deg 90deg,
+        #45b7d1 90deg 135deg,
+        #96ceb4 135deg 180deg,
+        #feca57 180deg 225deg,
+        #ff9ff3 225deg 270deg,
+        #ff6b6b 270deg 315deg,
+        #4ecdc4 315deg 360deg
+    );
+    transition: transform 1.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.bonus-roulette-pointer {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent;
+    border-right: 15px solid transparent;
+    border-top: 20px solid #333;
+}
+
+.bonus-roulette-numbers {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.bonus-target-info {
+    background: linear-gradient(45deg, #feca57, #ff9ff3);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+}
+
+.bonus-roulette-btn, .bonus-start-game-btn {
+    background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+    color: white;
+    border: none;
+    padding: 25px 50px;
+    margin: 20px;
+    border-radius: 30px;
+    font-size: 1.5em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.bonus-roulette-btn:hover, .bonus-start-game-btn:hover {
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
+    background: linear-gradient(45deg, #ff8e8e, #ffb3b3);
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.bonus-shooting-area {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background: linear-gradient(to bottom, #87ceeb, #98fb98);
+    border-radius: 15px;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.bonus-player {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 40px;
+    background: #ff6b6b;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: left 0.1s ease;
+}
+
+.bonus-falling-number {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(45deg, #4ecdc4, #45b7d1);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    font-size: 1.2em;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.bonus-bullet {
+    position: absolute;
+    width: 8px;
+    height: 15px;
+    background: #ff6b6b;
+    border-radius: 4px;
+}
+
+.bonus-score {
+    font-size: 1.5em;
+    color: #333;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.bonus-timer {
+    font-size: 1.3em;
+    color: #ff6b6b;
+    margin: 10px 0;
+    font-weight: bold;
+}
+
+.bonus-game-instructions {
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 15px;
+    margin: 15px 0;
+    border: 2px solid #4ecdc4;
+    font-size: 1em;
+    color: #333;
+    line-height: 1.4;
+}
+
+.bonus-controls-info {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.bonus-game-over-content {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 20px;
+    padding: 30px;
+    margin: 20px 0;
+    border: 3px solid #ff6b6b;
+    animation: glow 2s ease-in-out infinite;
+}
+
+@keyframes glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.3); }
+    50% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.6); }
+}
+
+.bonus-final-score {
+    font-size: 2em;
+    color: #ff6b6b;
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+.bonus-achievements {
+    background: linear-gradient(45deg, #feca57, #ff9ff3);
+    color: white;
+    padding: 15px;
+    border-radius: 15px;
+    margin: 15px 0;
+    font-weight: bold;
+}
+
+.bonus-back-btn {
+    background: linear-gradient(45deg, #95a5a6, #bdc3c7);
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    border-radius: 15px;
+    cursor: pointer;
+    margin: 10px;
+    transition: all 0.3s ease;
+    font-size: 1.1em;
+}
+
+.bonus-back-btn:hover {
+    transform: scale(1.1);
+}
+
+.bonus-stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.bonus-star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 2s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+.level-up-message {
+    background: linear-gradient(45deg, #4CAF50, #81C784);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    font-size: 1.2em;
+    font-weight: bold;
+    text-align: center;
+    animation: levelUpGlow 2s infinite;
+}
+
+@keyframes levelUpGlow {
+    0%, 100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.5); }
+    50% { box-shadow: 0 0 30px rgba(76, 175, 80, 0.8); }
+}
 </style>
 </head>
 <body>
@@ -152,7 +525,7 @@ input:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
 <div class="mode-info select"><h3>🎮 選べるモード</h3><p>• 好きなレベルを選んで練習<br>• 10問連続正解でレベルクリア<br>• 正解でポイント獲得（少なめ）</p></div>
 <div class="mode-info formula"><h3>📝 式だけモード</h3><p>• 立式の練習に特化<br>• 計算結果ではなく式を入力<br>• 数学的思考力を鍛える</p></div>
 <div class="mode-info practice"><h3>📚 練習モード</h3><p>• 各レベルで5問連続正解で次のレベルへ<br>• 間違えたらそのレベルのカウントが0に戻る<br>• レベルアップでボーナスポイント（中程度）</p></div>
-<div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全5レベル×各5問＝計25問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>クリアで隠しステージ解放！</strong></p></div>
+<div class="mode-info summary"><h3>🎯 まとめモード</h3><p>• 全5レベル×各5問＝計25問に挑戦<br>• 一問でも間違えるとゲームオーバー<br>• クリア時間に応じて大量ポイント獲得<br>• <strong>各レベルクリアでボーナスゲーム！</strong><br>• <strong>クリアで隠しステージ解放！</strong></p></div>
 <div id="hiddenModeInfo" class="mode-info hidden" style="display:none"><h3>👑 隠しステージ</h3><p>• 超高難度の小数の倍問題に挑戦<br>• 全10問クリアで「小数の倍マスター」の称号獲得<br>• 派手なアニメーションで祝福！</p></div>
 </div>
 <button class="mode-btn select" onclick="showLevelSelect()">🎮 選べるモード</button>
@@ -342,6 +715,89 @@ input:disabled{background:#f5f5f5;color:#999;cursor:not-allowed}
 </div>
 </div>
 
+<!-- ボーナスゲーム用のコンテナ -->
+<div id="bonusGameContainer" class="bonus-game-container">
+    <div class="bonus-game-content">
+        <div class="bonus-stars" id="bonusStars"></div>
+        
+        <div class="bonus-container">
+            <h1>🎯 ボーナスゲーム - 倍数シューティング 🎯</h1>
+            
+            <!-- ルーレット画面 -->
+            <div class="bonus-roulette-setup active" id="bonusRouletteSetup">
+                <div class="bonus-setup-description">
+                    <h3>🎲 ルーレットで倍数を決めよう！</h3>
+                    <p>ルーレットを回して、今回のゲームで狙う倍数を決定します。<br>
+                    決定した倍数を撃って高得点を狙おう！</p>
+                </div>
+                
+                <div class="bonus-roulette-container">
+                    <div class="bonus-roulette-pointer"></div>
+                    <div class="bonus-roulette-wheel" id="bonusRouletteWheel">
+                        <div class="bonus-roulette-numbers">2-9</div>
+                    </div>
+                    <button class="bonus-roulette-btn" id="bonusSpinBtn" onclick="bonusSpinRoulette()">
+                        🎲 ルーレットを回す！
+                    </button>
+                </div>
+            </div>
+
+            <!-- ゲーム設定画面 -->
+            <div class="bonus-game-setup" id="bonusGameSetup">
+                <div class="bonus-setup-description">
+                    <h3>🎮 ゲームの遊び方</h3>
+                    <p>決定した倍数を撃って高得点を狙おう！<br>
+                    <strong>正解（倍数）：+10点</strong><br>
+                    <strong>不正解：-5点</strong><br>
+                    制限時間は30秒で、約60個の数字が落ちてきます！<br>
+                    その中で目標の倍数は20個落ちてきます！</p>
+                </div>
+                
+                <div class="bonus-target-info" id="bonusTargetInfo">
+                    目標の倍数: ?の倍数
+                </div>
+                
+                <button class="bonus-start-game-btn" onclick="bonusStartGame()">
+                    🚀 ゲーム開始！
+                </button>
+            </div>
+
+            <!-- シューティングゲーム -->
+            <div class="bonus-shooting-game" id="bonusShootingGame">
+                <h2>🎯 倍数シューティング！</h2>
+                <div class="bonus-game-instructions" id="bonusGameInstructions">
+                    <strong>?の倍数を撃て！</strong>
+                </div>
+                <div class="bonus-controls-info">
+                    移動: ←→キー または タッチ | 発射: スペース または エンター
+                </div>
+                <div class="bonus-timer" id="bonusGameTimer">残り時間: 30秒</div>
+                <div class="bonus-score" id="bonusGameScore">スコア: 0</div>
+                <div class="bonus-shooting-area" id="bonusShootingArea">
+                    <div class="bonus-player" id="bonusPlayer"></div>
+                </div>
+                <button class="bonus-back-btn" onclick="bonusGoHome()">🏠 ホームに戻る</button>
+            </div>
+
+                     <!-- ゲーム終了画面 -->
+            <div class="bonus-game-over" id="bonusGameOver">
+                <div class="bonus-game-over-content">
+                    <h2>🎉 ボーナスゲーム終了！</h2>
+                    <div class="bonus-final-score" id="bonusFinalScore">最終スコア: 0</div>
+                    <div class="bonus-achievements" id="bonusAchievements">
+                        <!-- 達成内容が表示されます -->
+                    </div>
+                    <div class="level-up-message">
+                        <p>🎉 ボーナスポイントを獲得しました！ 🎉</p>
+                        <p>次のレベルに進みます！</p>
+                    </div>
+                    <button class="bonus-start-game-btn" onclick="bonusReturnToMainGame()">次のレベルへ進む</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 // Firebase関連の関数
 async function savePlayerScore(playerId, points) {
@@ -490,6 +946,560 @@ async function displayFirebaseRanking() {
     rankingDialog.innerHTML = rankingHTML;
     document.body.appendChild(rankingDialog);
 }
+
+// ボーナスゲーム関連の変数とフラグ
+let bonusGameActive = false;
+let bonusGameScore = 0;
+let bonusTargetMultiple = 0;
+let bonusGameTimer = null;
+let bonusTimeRemaining = 30;
+let bonusPlayerPosition = 50;
+let bonusKeys = {};
+let bonusCorrectHits = 0;
+let bonusTotalHits = 0;
+let bonusNumbersDropped = 0;
+let bonusMultiplesDropped = 0;
+let bonusBullets = [];
+let bonusGameInterval = null;
+let bonusIsSpinning = false;
+let pendingLevelUp = false; // レベルアップ待機フラグ
+
+// ボーナスゲームの表示
+function showBonusGame() {
+    if (bonusGameActive) return; // 既にボーナスゲーム中の場合は何もしない
+    
+    bonusGameActive = true;
+    const bonusContainer = document.getElementById('bonusGameContainer');
+    bonusContainer.classList.add('active');
+    
+    // ボーナスゲームの初期化
+    resetBonusGame();
+    
+    // 星の背景を生成
+    createBonusStars();
+    
+    // ルーレット画面を表示
+    showBonusRouletteSetup();
+}
+
+// ボーナスゲームを隠す
+function hideBonusGame() {
+    bonusGameActive = false;
+    const bonusContainer = document.getElementById('bonusGameContainer');
+    bonusContainer.classList.remove('active');
+    
+    // ボーナスゲームのクリーンアップ
+    cleanupBonusGame();
+}
+
+// ボーナスゲームのリセット
+function resetBonusGame() {
+    bonusGameScore = 0;
+    bonusTargetMultiple = 0;
+    bonusTimeRemaining = 30;
+    bonusPlayerPosition = 50;
+    bonusCorrectHits = 0;
+    bonusTotalHits = 0;
+    bonusNumbersDropped = 0;
+    bonusMultiplesDropped = 0;
+    bonusBullets = [];
+    bonusIsSpinning = false;
+    
+    if (bonusGameTimer) {
+        clearInterval(bonusGameTimer);
+        bonusGameTimer = null;
+    }
+    
+    if (bonusGameInterval) {
+        clearInterval(bonusGameInterval);
+        bonusGameInterval = null;
+    }
+}
+
+// ボーナスゲームのクリーンアップ
+function cleanupBonusGame() {
+    resetBonusGame();
+    
+    // 全ての画面を非表示にして、ルーレット画面をアクティブに
+    document.getElementById('bonusRouletteSetup').classList.remove('active');
+    document.getElementById('bonusGameSetup').classList.remove('active');
+    document.getElementById('bonusShootingGame').classList.remove('active');
+    document.getElementById('bonusGameOver').classList.remove('active');
+    
+    document.getElementById('bonusRouletteSetup').classList.add('active');
+    
+    // ルーレットをリセット
+    const wheel = document.getElementById('bonusRouletteWheel');
+    if (wheel) {
+        wheel.style.transform = 'rotate(0deg)';
+    }
+    
+    // シューティングエリアをクリア
+    const shootingArea = document.getElementById('bonusShootingArea');
+    if (shootingArea) {
+        shootingArea.querySelectorAll('.bonus-falling-number, .bonus-bullet').forEach(el => {
+            if (el.parentNode) {
+                el.remove();
+            }
+        });
+    }
+}
+
+// ボーナス星の背景を生成
+function createBonusStars() {
+    const starsContainer = document.getElementById('bonusStars');
+    starsContainer.innerHTML = '';
+    
+    for (let i = 0; i < 50; i++) {
+        const star = document.createElement('div');
+        star.className = 'bonus-star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = star.style.height = Math.random() * 3 + 1 + 'px';
+        star.style.animationDelay = Math.random() * 2 + 's';
+        starsContainer.appendChild(star);
+    }
+}
+
+// ボーナスルーレット画面を表示
+function showBonusRouletteSetup() {
+    document.getElementById('bonusRouletteSetup').classList.add('active');
+    document.getElementById('bonusGameSetup').classList.remove('active');
+    document.getElementById('bonusShootingGame').classList.remove('active');
+    document.getElementById('bonusGameOver').classList.remove('active');
+}
+
+// ボーナスルーレットを回す
+function bonusSpinRoulette() {
+    if (bonusIsSpinning) return;
+    
+    bonusIsSpinning = true;
+    const wheel = document.getElementById('bonusRouletteWheel');
+    const spinBtn = document.getElementById('bonusSpinBtn');
+    
+    spinBtn.disabled = true;
+    spinBtn.textContent = '回転中...';
+    
+    const minRotations = 3;
+    const randomRotations = Math.random() * 2;
+    const totalRotations = minRotations + randomRotations;
+    
+    const segments = 8;
+    const segmentAngle = 360 / segments;
+    const finalSegment = Math.floor(Math.random() * segments);
+    const finalAngle = finalSegment * segmentAngle + (segmentAngle / 2);
+    
+    bonusTargetMultiple = finalSegment + 2;
+    
+    const totalAngle = totalRotations * 360 + finalAngle;
+    
+    wheel.style.transform = `rotate(${totalAngle}deg)`;
+    
+    setTimeout(() => {
+        bonusIsSpinning = false;
+        document.getElementById('bonusRouletteSetup').classList.remove('active');
+        document.getElementById('bonusGameSetup').classList.add('active');
+        
+        document.getElementById('bonusTargetInfo').textContent = `目標の倍数: ${bonusTargetMultiple}の倍数`;
+        
+        spinBtn.disabled = false;
+        spinBtn.textContent = '🎲 ルーレットを回す！';
+    }, 1500);
+}
+
+// ボーナスゲーム開始
+function bonusStartGame() {
+    document.getElementById('bonusGameSetup').classList.remove('active');
+    document.getElementById('bonusShootingGame').classList.add('active');
+    
+    document.getElementById('bonusGameInstructions').innerHTML = `<strong>${bonusTargetMultiple}の倍数を撃て！</strong>`;
+    
+    bonusGameScore = 0;
+    bonusTimeRemaining = 30;
+    bonusPlayerPosition = 50;
+    bonusCorrectHits = 0;
+    bonusTotalHits = 0;
+    bonusNumbersDropped = 0;
+    bonusMultiplesDropped = 0;
+    bonusBullets = [];
+    
+    bonusUpdateGameScore();
+    bonusUpdateTimer();
+    bonusUpdatePlayerPosition();
+    bonusStartFallingNumbers();
+    bonusSetupShooting();
+    
+    bonusGameTimer = setInterval(() => {
+        bonusTimeRemaining--;
+        bonusUpdateTimer();
+        if (bonusTimeRemaining <= 0) {
+            bonusEndShootingGame();
+        }
+    }, 1000);
+}
+
+// ボーナスプレイヤーの位置を更新
+function bonusUpdatePlayerPosition() {
+    const player = document.getElementById('bonusPlayer');
+    const shootingArea = document.getElementById('bonusShootingArea');
+    const playerWidth = 40;
+    const maxLeft = shootingArea.offsetWidth - playerWidth;
+    
+    const minPosition = 10;
+    const maxPosition = 90;
+    bonusPlayerPosition = Math.max(minPosition, Math.min(maxPosition, bonusPlayerPosition));
+    
+    const leftPos = ((bonusPlayerPosition - minPosition) / (maxPosition - minPosition)) * (maxLeft - playerWidth) + playerWidth/2;
+    player.style.left = leftPos + 'px';
+}
+
+// ボーナスタイマー更新
+function bonusUpdateTimer() {
+    document.getElementById('bonusGameTimer').textContent = `残り時間: ${bonusTimeRemaining}秒`;
+}
+
+// ボーナス落下する数字を開始
+function bonusStartFallingNumbers() {
+    bonusGameInterval = setInterval(() => {
+        if (bonusNumbersDropped < 60 && bonusTimeRemaining > 0) {
+            const shouldCreateMultiple = bonusMultiplesDropped < 20 && 
+                (Math.random() < 0.4 || (bonusTimeRemaining <= 10 && bonusMultiplesDropped < 15));
+            
+            bonusCreateFallingNumber(shouldCreateMultiple);
+            bonusNumbersDropped++;
+        }
+    }, 500);
+}
+
+// ボーナス落下する数字を作成
+function bonusCreateFallingNumber(forceMultiple = false) {
+    if (bonusTimeRemaining <= 0 || bonusNumbersDropped >= 60) return;
+    
+    const shootingArea = document.getElementById('bonusShootingArea');
+    const numberElement = document.createElement('div');
+    numberElement.className = 'bonus-falling-number';
+    
+    let randomNumber;
+    let isMultiple;
+    
+    if (forceMultiple && bonusMultiplesDropped < 20) {
+        const multipleIndex = Math.floor(Math.random() * 10) + 1;
+        randomNumber = bonusTargetMultiple * multipleIndex;
+        if (randomNumber > 100) {
+            randomNumber = bonusTargetMultiple * (Math.floor(Math.random() * 5) + 1);
+        }
+        isMultiple = true;
+        bonusMultiplesDropped++;
+    } else {
+        randomNumber = Math.floor(Math.random() * 100) + 1;
+        isMultiple = randomNumber % bonusTargetMultiple === 0;
+        if (isMultiple) {
+            bonusMultiplesDropped++;
+        }
+    }
+    
+    numberElement.textContent = randomNumber;
+    numberElement.dataset.number = randomNumber;
+    numberElement.dataset.isMultiple = isMultiple;
+    
+    const numberWidth = 50;
+    const margin = 30;
+    const minLeft = margin;
+    const maxLeft = shootingArea.offsetWidth - numberWidth - margin;
+    const leftPosition = Math.random() * (maxLeft - minLeft) + minLeft;
+    
+    numberElement.style.left = leftPosition + 'px';
+    numberElement.style.top = '0px';
+    
+    shootingArea.appendChild(numberElement);
+    bonusAnimateFallingNumber(numberElement);
+}
+
+// ボーナス数字の落下アニメーション
+function bonusAnimateFallingNumber(numberElement) {
+    const fallInterval = setInterval(() => {
+        const currentTop = parseInt(numberElement.style.top);
+        const shootingArea = document.getElementById('bonusShootingArea');
+        
+        if (currentTop > shootingArea.offsetHeight || bonusTimeRemaining <= 0) {
+            if (numberElement.parentNode) {
+                numberElement.remove();
+            }
+            clearInterval(fallInterval);
+        } else {
+            numberElement.style.top = (currentTop + 2.5) + 'px';
+        }
+    }, 20);
+}
+
+// ボーナス射撃システム設定
+function bonusSetupShooting() {
+    const shootingArea = document.getElementById('bonusShootingArea');
+    
+    // タッチイベント
+    shootingArea.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        const rect = shootingArea.getBoundingClientRect();
+        const x = e.touches[0].clientX - rect.left;
+        const newPosition = (x / shootingArea.offsetWidth) * 100;
+        bonusPlayerPosition = Math.max(10, Math.min(90, newPosition));
+        bonusUpdatePlayerPosition();
+    });
+    
+    shootingArea.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        const rect = shootingArea.getBoundingClientRect();
+        const x = e.touches[0].clientX - rect.left;
+        const newPosition = (x / shootingArea.offsetWidth) * 100;
+        bonusPlayerPosition = Math.max(10, Math.min(90, newPosition));
+        bonusUpdatePlayerPosition();
+    });
+    
+    shootingArea.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        bonusFireBullet();
+    });
+    
+    // マウスイベント
+    shootingArea.addEventListener('mousemove', (e) => {
+        const rect = shootingArea.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const newPosition = (x / shootingArea.offsetWidth) * 100;
+        bonusPlayerPosition = Math.max(10, Math.min(90, newPosition));
+        bonusUpdatePlayerPosition();
+    });
+    
+    shootingArea.addEventListener('click', (e) => {
+        if (bonusTimeRemaining > 0) {
+            bonusFireBullet();
+        }
+    });
+    
+    // キーボード移動
+    const moveInterval = setInterval(() => {
+        if (bonusTimeRemaining <= 0 || !bonusGameActive) {
+            clearInterval(moveInterval);
+            return;
+        }
+        
+        if (bonusKeys['ArrowLeft'] || bonusKeys['a'] || bonusKeys['A']) {
+            bonusPlayerPosition = Math.max(10, bonusPlayerPosition - 2);
+            bonusUpdatePlayerPosition();
+        }
+        if (bonusKeys['ArrowRight'] || bonusKeys['d'] || bonusKeys['D']) {
+            bonusPlayerPosition = Math.min(90, bonusPlayerPosition + 2);
+            bonusUpdatePlayerPosition();
+        }
+    }, 16);
+}
+
+// ボーナス弾を発射
+function bonusFireBullet() {
+    const shootingArea = document.getElementById('bonusShootingArea');
+    const player = document.getElementById('bonusPlayer');
+    const bullet = document.createElement('div');
+    bullet.className = 'bonus-bullet';
+    
+    const playerRect = player.getBoundingClientRect();
+    const shootingRect = shootingArea.getBoundingClientRect();
+    const bulletX = playerRect.left - shootingRect.left + 16;
+    
+    bullet.style.left = bulletX + 'px';
+    bullet.style.bottom = '50px';
+    
+    shootingArea.appendChild(bullet);
+    
+    const bulletObj = {
+        element: bullet,
+        active: true,
+        hasHit: false
+    };
+    bonusBullets.push(bulletObj);
+    
+    const bulletInterval = setInterval(() => {
+        if (!bulletObj.active || bulletObj.hasHit || !bonusGameActive) {
+            clearInterval(bulletInterval);
+            return;
+        }
+        
+        const currentBottom = parseInt(bullet.style.bottom);
+        if (currentBottom > shootingArea.offsetHeight || bonusTimeRemaining <= 0) {
+            if (bullet.parentNode) {
+                bullet.remove();
+            }
+            bulletObj.active = false;
+            clearInterval(bulletInterval);
+        } else {
+            bullet.style.bottom = (currentBottom + 5) + 'px';
+            
+            const hitTarget = bonusCheckCollision(bullet, bulletObj);
+            if (hitTarget) {
+                bulletObj.hasHit = true;
+                bulletObj.active = false;
+                if (bullet.parentNode) {
+                    bullet.remove();
+                }
+                clearInterval(bulletInterval);
+            }
+        }
+    }, 20);
+}
+
+// ボーナス衝突判定
+function bonusCheckCollision(bullet, bulletObj) {
+    if (bulletObj.hasHit || !bulletObj.active) {
+        return false;
+    }
+    
+    const bulletRect = bullet.getBoundingClientRect();
+    const numbers = document.querySelectorAll('.bonus-falling-number');
+    
+    for (let numberElement of numbers) {
+        const numberRect = numberElement.getBoundingClientRect();
+        
+        if (bulletRect.left < numberRect.right &&
+            bulletRect.right > numberRect.left &&
+            bulletRect.top < numberRect.bottom &&
+            bulletRect.bottom > numberRect.top) {
+            
+            const isMultiple = numberElement.dataset.isMultiple === 'true';
+            bonusTotalHits++;
+            
+            if (isMultiple) {
+                bonusGameScore += 10;
+                bonusCorrectHits++;
+            } else {
+                bonusGameScore = Math.max(0, bonusGameScore - 5);
+            }
+            
+            bonusUpdateGameScore();
+            if (numberElement.parentNode) {
+                numberElement.remove();
+            }
+            
+            return true;
+        }
+    }
+    return false;
+}
+
+// ボーナススコア更新
+function bonusUpdateGameScore() {
+    document.getElementById('bonusGameScore').textContent = `スコア: ${bonusGameScore}`;
+}
+
+// ボーナスシューティングゲーム終了
+function bonusEndShootingGame() {
+    if (bonusGameInterval) {
+        clearInterval(bonusGameInterval);
+        bonusGameInterval = null;
+    }
+    if (bonusGameTimer) {
+        clearInterval(bonusGameTimer);
+        bonusGameTimer = null;
+    }
+    
+    bonusBullets.forEach(bulletObj => {
+        bulletObj.active = false;
+        bulletObj.hasHit = true;
+    });
+    
+    setTimeout(() => {
+        bonusShowGameOver();
+    }, 1000);
+}
+
+// ボーナスゲーム終了画面を表示
+function bonusShowGameOver() {
+    document.getElementById('bonusShootingGame').classList.remove('active');
+    document.getElementById('bonusGameOver').classList.add('active');
+    
+    document.getElementById('bonusFinalScore').textContent = `最終スコア: ${bonusGameScore}ポイント`;
+    
+    let achievements = '';
+    const accuracy = bonusTotalHits > 0 ? Math.round((bonusCorrectHits / bonusTotalHits) * 100) : 0;
+    
+    achievements += `🎯 ${bonusTargetMultiple}の倍数を ${bonusCorrectHits} 個撃破！<br>`;
+    achievements += `📊 正解率: ${accuracy}%<br>`;
+    achievements += `📈 落下した数字: ${bonusNumbersDropped} 個<br>`;
+    achievements += `🎲 落下した倍数: ${bonusMultiplesDropped} 個<br>`;
+    
+    if (bonusGameScore >= 150) {
+        achievements += '✨ 150ポイント達成！<br>';
+    } else if (bonusGameScore >= 100) {
+        achievements += '🌟 100ポイント達成！<br>';
+    }
+    
+    if (accuracy >= 80) {
+        achievements += '🏆 高精度シューター！<br>';
+    }
+    
+    if (bonusCorrectHits >= 15) {
+        achievements += '🎯 エクセレント！15個以上撃破！<br>';
+    }
+    
+    document.getElementById('bonusAchievements').innerHTML = achievements;
+}
+
+// ボーナスゲームからメインゲームに戻る
+async function bonusReturnToMainGame() {
+    // ボーナスゲームで獲得したポイントをメインゲームに追加
+    if (bonusGameScore > 0) {
+        await addPoints(bonusGameScore, true);
+    }
+    
+    // ボーナスゲームを隠す
+    hideBonusGame();
+    
+    // 待機中のレベルアップ処理を実行
+    if (pendingLevelUp) {
+        pendingLevelUp = false;
+        
+        // まとめモードでレベルアップ処理
+        if (state.mode === 'summary') {
+            // レベルアップアニメーション
+            $("monster").classList.add("level-up");
+            setTimeout(() => $("monster").classList.remove("level-up"), 3000);
+            
+            setTimeout(() => {
+                state.level++;
+                updateLevelIndicator();
+                updateProgressBar();
+                newProblem();
+            }, 1000);
+        }
+    }
+}
+
+// ボーナスゲームのホームに戻る
+function bonusGoHome() {
+    hideBonusGame();
+    
+    // メインゲームに戻る
+    if (pendingLevelUp) {
+        bonusReturnToMainGame();
+    }
+}
+
+// ボーナスゲーム用のキーイベント処理
+document.addEventListener('keydown', (e) => {
+    if (bonusGameActive) {
+        bonusKeys[e.key] = true;
+        
+        if ((e.key === ' ' || e.key === 'Enter') && document.getElementById('bonusShootingGame').classList.contains('active')) {
+            e.preventDefault();
+            if (bonusTimeRemaining > 0) {
+                bonusFireBullet();
+            }
+        }
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    if (bonusGameActive) {
+        bonusKeys[e.key] = false;
+    }
+});
 
 const $=id=>document.getElementById(id)||{style:{},textContent:'',innerHTML:'',value:'',classList:{add:()=>{},remove:()=>{}},appendChild:()=>{},remove:()=>{},focus:()=>{},disabled:false};
 let state={score:0,level:1,prob:null,unit:"",mode:"",lvCount:0,totalQ:0,qNum:0,completed:new Set(),selectQCount:0,startTime:null,timerInterval:null,hiddenQ:0,sessionPoints:0,selectCorrectCount:0,clearedLevels:new Set(),formulaCorrectCount:0,answerSubmitted:false};
@@ -819,7 +1829,6 @@ function generateHiddenProblem(){
     }
 }
 
-
 function generateProblem(lv){
     if(state.mode==='hidden')return generateHiddenProblem();
     
@@ -1099,7 +2108,7 @@ function selectMode(mode){
         $("modeDisplay").innerHTML='<div class="mode-info hidden"><strong>👑 隠しステージ</strong></div>';
         $("progressBar").className="progress-bar hidden";
         
-        // 通常モード用のUI表示
+               // 通常モード用のUI表示
         $("answerTitle").textContent = "答えを入力してください";
         $("normalInput").style.display = "flex";
         $("formulaInput").style.display = "none";
@@ -1329,6 +2338,7 @@ function submitFormulaAnswer(){
     }
 }
 
+// handleCorrect関数を修正（競合回避版）
 async function handleCorrect(){
     state.score++;
     $("score").textContent=state.score;
@@ -1362,13 +2372,25 @@ async function handleCorrect(){
         }
     }else if(state.mode==='summary'){
         state.totalQ++;
-        if(state.totalQ>=25){
+        
+        // まとめモードでレベルクリア時にボーナスゲームを表示
+        if(state.totalQ % 5 === 0 && state.totalQ < 25) {
+            // レベルクリア時の処理
+            pendingLevelUp = true; // レベルアップ待機フラグを設定
+            
+            // ボーナスゲームを表示
+            setTimeout(() => {
+                showBonusGame();
+            }, 1500);
+            return; // ここで処理を停止し、ボーナスゲーム後に続行
+        } else if(state.totalQ>=25){
             stopTimer();
             const clearTime=getElapsedTime();
             enableHiddenStage();
             setTimeout(()=>showClear(clearTime),1000);
             return;
-        }else if(state.totalQ%5===0){
+        } else if(state.totalQ%5===0){
+            // レベルアップ処理を追加
             state.level++;
         }
     }else if(state.mode==='hidden'){
